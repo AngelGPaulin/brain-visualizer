@@ -1,0 +1,41 @@
+# Directorio de módulos de Node.js
+node_modules/
+
+# Directorio de salida de Webpack
+dist/
+
+# Directorio de modelos (si no quieres subir tus modelos 3D al repositorio)
+assets/models/
+
+# Archivos de configuración de npm (opcional, pero buena práctica)
+.npm/
+.npmrc
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Archivos de caché del sistema operativo
+.DS_Store
+Thumbs.db
+
+# Archivos de IDEs comunes (ej. VS Code, Sublime Text, WebStorm)
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Archivos de entornos locales (si los usaras, aunque no parece el caso directo ahora)
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+
+# Archivos temporales o de backup
+*.tmp
+*.bak
+*~
+~*
