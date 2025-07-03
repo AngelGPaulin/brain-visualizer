@@ -1,0 +1,31 @@
+{
+  "name": "visualizador-cerebral",
+  "version": "1.0.0",
+  "description": "Un visualizador cerebral interactivo en el navegador, desarrollado desde cero.",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "webpack serve --open --mode development",
+    "build": "webpack --mode production"
+  },
+  "keywords": [
+    "neuroscience",
+    "brain",
+    "webgl",
+    "3d",
+    "javascript"
+  ],
+  "author": "Tu Nombre",
+  "license": "MIT",
+  "devDependencies": {
+    "copy-webpack-plugin": "^13.0.0",
+    "css-loader": "^6.0.0",
+    "html-webpack-plugin": "^5.0.0",
+    "style-loader": "^3.0.0",
+    "webpack": "^5.0.0",
+    "webpack-cli": "^4.0.0",
+    "webpack-dev-server": "^4.0.0"
+  },
+  "dependencies": {
+    "three": "^0.165.0"
+  }
+}
