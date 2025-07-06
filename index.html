@@ -1,11 +1,111 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mi Visualizador Cerebral</title>
-    </head>
+    <style>
+        body { margin: 0; overflow: hidden; font-family: Arial, sans-serif; background-color: #333; color: white; }
+        #threejs-container {
+            width: 100vw;
+            height: 100vh;
+            display: block;
+        }
+        #ui-controls {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        #ui-controls button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s ease;
+        }
+        #ui-controls button:hover {
+            background-color: #0056b3;
+        }
+        #ui-controls button.active {
+            background-color: #28a745;
+        }
+        #ui-controls label {
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+        #ui-controls input[type="range"] {
+            width: 200px;
+            -webkit-appearance: none;
+            height: 8px;
+            background: #d3d3d3;
+            outline: none;
+            opacity: 0.7;
+            transition: opacity .2s;
+            border-radius: 5px;
+        }
+        #ui-controls input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #007bff;
+            cursor: pointer;
+        }
+        #ui-controls input[type="range"]::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #007bff;
+            cursor: pointer;
+        }
+        #slider-value {
+            margin-left: 10px;
+            font-size: 14px;
+        }
+        /* Opcional: Estilo para el contenedor del slider cuando esté oculto */
+        #slider-container.hidden {
+            display: none;
+        }
+    </style>
+</head>
 <body>
-    <div id="app-container" style="width: 100vw; height: 100vh;"></div>
-    </body>
+    <div id="threejs-container"></div>
+
+    <div id="ui-controls">
+        <div>
+            <button class="cut-type-btn" data-cut-type="none">Sin Corte</button>
+            <button class="cut-type-btn" data-cut-type="sagittal">Corte Sagital</button>
+            <button class="cut-type-btn" data-cut-type="coronal">Corte Coronal</button>
+            <button class="cut-type-btn" data-cut-type="axial">Corte Axial</button>
+        </div>
+        <div id="slider-container">
+            <label for="posicionCorteSlider">Posición de Corte:</label>
+            <input type="range" id="posicionCorteSlider" min="-1" max="1" step="0.01" value="0">
+            <span id="slider-value">0</span>
+        </div>
+    </div>
+
+    <script type="module" src="src/index.js"></script>
+    <script>
+        const slider = document.getElementById('posicionCorteSlider');
+        const sliderValueDisplay = document.getElementById('slider-value');
+
+        slider.addEventListener('input', () => {
+            sliderValueDisplay.textContent = slider.value;
+        });
+
+        sliderValueDisplay.textContent = slider.value;
+    </script>
+</body>
 </html>

@@ -1,55 +1,90 @@
 import * as THREE from 'three';
-import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
+import { OBJLoader } from 'three/addons/loaders/OBJLoader.js'; // Asegúrate de que esta ruta sea correcta
 
 export class DataLoader {
-  constructor() {
-    this.objLoader = new OBJLoader();
-  }
-
-  /**
-   * Carga un archivo OBJ desde una URL.
-   * @param {string} url La URL del archivo OBJ a cargar.
-   * @returns {Promise<THREE.Object3D>} Una promesa que resuelve con el objeto 3D cargado.
-   */
-  async loadOBJ(url) {
-    try {
-      console.log(`Cargando modelo OBJ desde: ${url}`);
-      const object = await this.objLoader.loadAsync(url);
-      console.log(`Modelo OBJ cargado exitosamente desde: ${url}`);
-
-      // --- Opcional: Centrar el modelo ---
-      // Calcula la caja delimitadora del objeto.
-      const box = new THREE.Box3().setFromObject(object);
-      // Obtiene el centro de la caja delimitadora.
-      const center = box.getCenter(new THREE.Vector3());
-      // Mueve el objeto para que su centro esté en el origen (0,0,0).
-      object.position.sub(center);
-      console.log(`Modelo centrado. Centro: (${center.x.toFixed(2)}, ${center.y.toFixed(2)}, ${center.z.toFixed(2)})`);
-
-      // --- Opcional: Escalar el modelo a un tamaño razonable ---
-      // Calcula el tamaño del modelo en cada dimensión.
-      const size = box.getSize(new THREE.Vector3());
-      // Encuentra la dimensión máxima (x, y o z).
-      const maxDim = Math.max(size.x, size.y, size.z);
-      // Define el tamaño deseado para la dimensión máxima del modelo.
-      // Puedes ajustar este valor (ej. 50, 150, 200, 300) para adecuar el tamaño del cerebro a tu escena.
-      // Empieza con 100 y ajusta según lo veas en el navegador.
-      const desiredDim = 100;
-
-      // Calcula el factor de escala necesario.
-      if (maxDim > 0) { // Evita división por cero si el modelo no tiene dimensiones
-          object.scale.multiplyScalar(desiredDim / maxDim);
-          console.log(`Modelo escalado. Dimensión máxima original: ${maxDim.toFixed(2)}, Escala aplicada: ${(desiredDim / maxDim).toFixed(2)}`);
-      } else {
-          console.warn("La dimensión máxima del modelo es cero, no se aplicó escalado.");
-      }
-
-      return object;
-    } catch (error) {
-      console.error(`Error al cargar el archivo OBJ desde ${url}:`, error);
-      throw error; // Propaga el error para que pueda ser manejado por la función que llama.
+    constructor() {
+        console.log("DataLoader inicializado."); //
+        this.objLoader = new OBJLoader();
     }
-  }
 
-  // Puedes añadir otros métodos aquí para cargar diferentes tipos de archivos 3D (GLTF, etc.) si lo necesitas.
+    /**
+     * Carga un modelo OBJ desde una ruta específica.
+     * @param {string} path La ruta al archivo OBJ. (Ej: 'assets/models/brain_model.obj')
+     * @returns {Promise<Object3D>} Una promesa que resuelve con el objeto 3D cargado.
+     */
+    loadOBJ(path) {
+        return new Promise((resolve, reject) => {
+            console.log(`Cargando modelo OBJ desde: ${path}`); //
+
+            // ¡IMPORTANTE! Asegúrate de que esta línea NO esté presente o esté COMENTADA:
+            // const correctedPath = `src/${path}`;
+
+            const modelPath = path; // Usar la ruta tal cual: 'assets/models/brain_model.obj'
+
+            this.objLoader.load(
+                modelPath,
+                (object) => {
+                    console.log("Modelo OBJ cargado exitosamente."); //
+                    // Línea que dio el error 'this.processModel is not a function'
+                    this.processModel(object);
+                    resolve(object);
+                },
+                (xhr) => {
+                    // console.log((xhr.loaded / xhr.total * 100) + '% cargado');
+                },
+                (error) => {
+                    console.error(`Error al cargar el archivo OBJ desde ${modelPath}:`, error); //
+                    reject(new Error(`HttpError: fetch for "${modelPath}" responded with 404: Not Found`)); //
+                }
+            );
+        });
+    }
+
+    // ESTA FUNCIÓN DEBE ESTAR AQUÍ, DENTRO DE LA CLASE DataLoader
+    processModel(model) {
+        model.traverse((child) => {
+            if (child.isMesh) {
+                child.material = new THREE.MeshStandardMaterial({
+                    color: 0xAAAAAA,
+                    metalness: 0.2,
+                    roughness: 0.8,
+                });
+                // No es estrictamente necesario calcular boundingBox aquí,
+                // se calculará después del traverse
+            }
+        });
+
+        // 1. Calcula la caja delimitadora del modelo ANTES del escalado o cualquier transformación
+        const initialBoundingBox = new THREE.Box3().setFromObject(model);
+        const initialCenter = new THREE.Vector3();
+        initialBoundingBox.getCenter(initialCenter);
+        const initialSize = new THREE.Vector3();
+        initialBoundingBox.getSize(initialSize);
+
+        // 2. Escalar el modelo para que se ajuste a la escena
+        const maxDim = Math.max(initialSize.x, initialSize.y, initialSize.z);
+        const desiredMaxDim = 100; // Por ejemplo, un tamaño deseado en unidades Three.js
+        const scaleFactor = desiredMaxDim / maxDim;
+        model.scale.set(scaleFactor, scaleFactor, scaleFactor);
+        console.log(`Modelo escalado. Dimensión máxima original: ${maxDim.toFixed(2)}, Escala aplicada: ${scaleFactor.toFixed(2)}`); //
+
+        // 3. Recalcula el bounding box y centra DESPUÉS del escalado
+        // Ahora, el modelo ya está escalado, y vamos a moverlo para que su centro esté en el origen.
+        const scaledBoundingBox = new THREE.Box3().setFromObject(model);
+        const scaledCenter = new THREE.Vector3();
+        scaledBoundingBox.getCenter(scaledCenter);
+        model.position.sub(scaledCenter); // Centra el modelo en el origen después de escalar
+
+        // 4. Última verificación y logs
+        const finalBoundingBox = new THREE.Box3().setFromObject(model);
+        const finalCenter = new THREE.Vector3();
+        finalBoundingBox.getCenter(finalCenter); // Esto debería ser muy cercano a (0,0,0)
+        const finalSize = new THREE.Vector3();
+        finalBoundingBox.getSize(finalSize);
+
+        console.log(`Caja delimitadora FINAL del modelo (min): (${finalBoundingBox.min.x.toFixed(2)}, ${finalBoundingBox.min.y.toFixed(2)}, ${finalBoundingBox.min.z.toFixed(2)})`); //
+        console.log(`Caja delimitadora FINAL del modelo (max): (${finalBoundingBox.max.x.toFixed(2)}, ${finalBoundingBox.max.y.toFixed(2)}, ${finalBoundingBox.max.z.toFixed(2)})`); //
+        console.log(`Tamaño FINAL del modelo: (${finalSize.x.toFixed(2)}, ${finalSize.y.toFixed(2)}, ${finalSize.z.toFixed(2)})`); //
+        console.log(`Centro FINAL del modelo: (${finalCenter.x.toFixed(2)}, ${finalCenter.y.toFixed(2)}, ${finalCenter.z.toFixed(2)})`); // Nuevo log para verificar el centro
+    }
 }

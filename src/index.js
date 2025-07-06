@@ -1,49 +1,69 @@
-import './ui/style.css'; // Asegurate de que esta ruta sea correcta: './ui/style.css'
-import * as THREE from 'three';
 import { SceneManager } from './core/SceneManager.js';
-import { DataLoader } from './core/DataLoader.js'; // Importa DataLoader
-import { MeshVisualizer } from './core/MeshVisualizer.js'; // Importa MeshVisualizer
+import { DataLoader } from './core/DataLoader.js';
+import { MeshVisualizer } from './core/MeshVisualizer.js';
+import { VolumeSlicer } from './core/VolumeSlicer.js';
 
-document.addEventListener('DOMContentLoaded', async () => { // Cambia a 'async' para usar await
-    console.log('Mi Visualizador Cerebral: DOM Cargado!');
+document.addEventListener('DOMContentLoaded', () => {
+    console.log("Mi Visualizador Cerebral: DOM Cargado!");
 
-    const sceneManager = new SceneManager('app-container');
+    const sceneManager = new SceneManager('threejs-container');
     const dataLoader = new DataLoader();
     const meshVisualizer = new MeshVisualizer(sceneManager.scene);
+    const volumeSlicer = new VolumeSlicer(sceneManager);
 
-    // **Elimina el cubo de prueba si quieres, o déjalo para referencia**
-    // Ya no necesitas estas lineas del cubo:
-    // const geometry = new THREE.BoxGeometry(50, 50, 50);
-    // const material = new THREE.MeshStandardMaterial({ color: 0x0077ff });
-    // const cube = new THREE.Mesh(geometry, material);
-    // sceneManager.scene.add(cube);
-    // console.log('Cubo de prueba añadido a la escena.');
-
-    // --- Cargar y mostrar tu modelo OBJ de cerebro ---
-    const brainModelUrl = 'assets/models/brain_model.obj'; // ASEGURATE DE QUE ESTA RUTA Y NOMBRE SEAN CORRECTOS
-
-    const brainObject = await dataLoader.loadOBJ(brainModelUrl);
-
-    if (brainObject) {
-        // Un material basico para el cerebro. Puedes cambiar el color.
-        const brainMaterial = new THREE.MeshStandardMaterial({
-            color: 0xc0c0c0, // Un gris claro
-            side: THREE.DoubleSide, // Para ver ambas caras del modelo
-            roughness: 0.8, // Que tan "áspero" es el material (0.0 es espejo, 1.0 es mate)
-            metalness: 0.1 // Que tan "metalico" es el material
+    // Cargar el modelo 3D
+    dataLoader.loadOBJ('assets/models/brain_model.obj')
+        .then(model => {
+            meshVisualizer.addModel(model);
+            volumeSlicer.setModel(model);
+            console.log("Modelo de cerebro cargado y configurado para corte.");
+        })
+        .catch(error => {
+            console.error("No se pudo cargar el modelo de cerebro.", error);
         });
-        meshVisualizer.addModel(brainObject, brainMaterial);
-        console.log('Modelo de cerebro OBJ cargado y añadido a la escena.');
 
-        // Opcional: Ajusta la posicion de la camara para ver el cerebro
-        // Esto depende del tamano y centrado de tu modelo.
-        // Es posible que el SceneManager ya lo haya centrado bien.
-        // sceneManager.camera.position.set(0, 0, 200);
-        // sceneManager.controls.target.set(0, 0, 0); // Apunta la camara al centro
-        // sceneManager.controls.update();
+    // --- Configuración de los controles de UI para el corte ---
+    const cutTypeButtons = document.querySelectorAll('.cut-type-btn');
+    const positionSlider = document.getElementById('posicionCorteSlider');
+    const sliderValueDisplay = document.getElementById('slider-value');
+    const sliderContainer = document.getElementById('slider-container'); // <--- NUEVA REFERENCIA
 
-    } else {
-        console.error('No se pudo cargar el modelo de cerebro.');
-    }
+    let currentCutType = 'none';
 
+    cutTypeButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const type = button.dataset.cutType;
+            currentCutType = type;
+
+            if (type === 'none') {
+                volumeSlicer.clearCuts();
+                sliderContainer.style.display = 'none'; // <--- OCULTA EL CONTENEDOR DEL SLIDER
+            } else {
+                let initialPositionForCut = -1;
+
+                positionSlider.value = initialPositionForCut;
+                sliderValueDisplay.textContent = initialPositionForCut;
+
+                volumeSlicer.applyCut(type, initialPositionForCut);
+                sliderContainer.style.display = 'block'; // <--- MUESTRA EL CONTENEDOR DEL SLIDER
+            }
+
+            cutTypeButtons.forEach(btn => btn.classList.remove('active'));
+            button.classList.add('active');
+        });
+    });
+
+    positionSlider.addEventListener('input', (event) => {
+        const position = parseFloat(event.target.value);
+        sliderValueDisplay.textContent = position;
+        if (currentCutType !== 'none') {
+            volumeSlicer.applyCut(currentCutType, position);
+        }
+    });
+
+    // Inicializa el estado del botón "Sin Corte" como activo al cargar la página
+    document.querySelector('[data-cut-type="none"]').classList.add('active');
+    sliderContainer.style.display = 'none'; // <--- OCULTA EL SLIDER AL INICIO
+
+    sliderValueDisplay.textContent = positionSlider.value;
 });
