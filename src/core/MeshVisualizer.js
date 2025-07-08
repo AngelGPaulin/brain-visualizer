@@ -1,41 +1,73 @@
 import * as THREE from 'three';
 
 export class MeshVisualizer {
-  constructor(scene) {
-    this.scene = scene;
-    console.log("MeshVisualizer inicializado.");
-  }
-
-  /**
-   * Añade un objeto 3D (normalmente el modelo cargado) a la escena.
-   * Aplica un material por defecto si no se proporciona uno.
-   * @param {THREE.Object3D} object El objeto 3D a añadir a la escena.
-   * @param {THREE.Material} material El material a aplicar a las mallas del objeto (opcional).
-   */
-  addModel(object, material = new THREE.MeshStandardMaterial({ color: 0xc0c0c0, side: THREE.DoubleSide })) {
-    if (!object) {
-      console.error("No se puede añadir un modelo nulo a la escena.");
-      return;
+    constructor(scene) {
+        this.scene = scene;
+        this.currentModel = null;
+        console.log("MeshVisualizer inicializado.");
     }
 
-    // Recorre todos los hijos del objeto.
-    object.traverse((child) => {
-      // Si el hijo es una malla (parte visible del modelo).
-      if (child.isMesh) {
-        // Aplica el material proporcionado o el material por defecto.
-        child.material = material;
-        // Habilita que el objeto proyecte sombras.
-        child.castShadow = true;
-        // Habilita que el objeto reciba sombras.
-        child.receiveShadow = true;
-      }
-    });
+    /**
+     * Añade un modelo 3D (malla OBJ) a la escena y lo procesa (escala, centra).
+     * @param {THREE.Object3D} model El objeto 3D a visualizar.
+     */
+    setModel(model) {
+        if (this.currentModel) {
+            this.scene.remove(this.currentModel); // Eliminar modelo anterior si existe
+        }
 
-    // Añade el objeto (que ahora contiene el modelo 3D) a la escena.
-    this.scene.add(object);
-    console.log("Nuevo modelo OBJ cargado y añadido a la escena.");
-  }
+        this.currentModel = model;
+        this.processModel(this.currentModel); // Procesar el modelo aquí
+        this.scene.add(this.currentModel);
+        console.log("Modelo añadido a la escena del visualizador de mallas.");
+    }
 
-  // Puedes añadir otros métodos aquí para manipular el modelo si es necesario,
-  // como removerlo, cambiar su material, o alternar su visibilidad.
+    // Mover la lógica de procesamiento (escalado y centrado) aquí desde DataLoader
+    processModel(model) {
+        model.traverse((child) => {
+            if (child.isMesh) {
+                child.material = new THREE.MeshStandardMaterial({
+                    color: 0xAAAAAA,
+                    metalness: 0.2,
+                    roughness: 0.8,
+                });
+            }
+        });
+
+        const initialBoundingBox = new THREE.Box3().setFromObject(model);
+        const initialCenter = new THREE.Vector3();
+        initialBoundingBox.getCenter(initialCenter);
+        const initialSize = new THREE.Vector3();
+        initialBoundingBox.getSize(initialSize);
+
+        const maxDim = Math.max(initialSize.x, initialSize.y, initialSize.z);
+        const desiredMaxDim = 100;
+        const scaleFactor = desiredMaxDim / maxDim;
+        model.scale.set(scaleFactor, scaleFactor, scaleFactor);
+        console.log(`Modelo escalado. Dimensión máxima original: ${maxDim.toFixed(2)}, Escala aplicada: ${scaleFactor.toFixed(2)}`);
+
+        const scaledBoundingBox = new THREE.Box3().setFromObject(model);
+        const scaledCenter = new THREE.Vector3();
+        scaledBoundingBox.getCenter(scaledCenter);
+        model.position.sub(scaledCenter);
+
+        const finalBoundingBox = new THREE.Box3().setFromObject(model);
+        const finalCenter = new THREE.Vector3();
+        finalBoundingBox.getCenter(finalCenter);
+        const finalSize = new THREE.Vector3();
+        finalBoundingBox.getSize(finalSize);
+
+        console.log(`Caja delimitadora FINAL del modelo (min): (${finalBoundingBox.min.x.toFixed(2)}, ${finalBoundingBox.min.y.toFixed(2)}, ${finalBoundingBox.min.z.toFixed(2)})`);
+        console.log(`Caja delimitadora FINAL del modelo (max): (${finalBoundingBox.max.x.toFixed(2)}, ${finalBoundingBox.max.y.toFixed(2)}, ${finalBoundingBox.max.z.toFixed(2)})`);
+        console.log(`Tamaño FINAL del modelo: (${finalSize.x.toFixed(2)}, ${finalSize.y.toFixed(2)}, ${finalSize.z.toFixed(2)})`);
+        console.log(`Centro FINAL del modelo: (${finalCenter.x.toFixed(2)}, ${finalCenter.y.toFixed(2)}, ${finalCenter.z.toFixed(2)})`);
+    }
+
+    clearModel() {
+        if (this.currentModel) {
+            this.scene.remove(this.currentModel);
+            this.currentModel = null;
+            console.log("Modelo removido de la escena del visualizador de mallas.");
+        }
+    }
 }
