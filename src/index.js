@@ -3,20 +3,26 @@ import { SceneManager } from './core/SceneManager.js';
 import { DataLoader } from './core/DataLoader.js';
 import { MeshVisualizer } from './core/MeshVisualizer.js';
 import { VolumeSlicer } from './core/VolumeSlicer.js';
-import './ui/style.css';
+import './ui/style.css'; // Asegúrate de que tus estilos base están importados
 
 document.addEventListener('DOMContentLoaded', () => {
     console.log("Mi Visualizador Cerebral: DOM Cargado!");
 
+    const loadingOverlay = document.getElementById('loading-overlay'); // Obtener el overlay
+
+    // Mostrar el overlay al inicio de la carga de la página
+    if (loadingOverlay) loadingOverlay.style.display = 'flex';
+
     const sceneManager = new SceneManager('three-container');
     if (!sceneManager.isInitialized) {
         console.error("SceneManager no se inicializó correctamente. Deteniendo la aplicación.");
+        if (loadingOverlay) loadingOverlay.style.display = 'none'; // Ocultar si hay error crítico al inicio
         return;
     }
 
     const dataLoader = new DataLoader();
     const meshVisualizer = new MeshVisualizer(sceneManager.scene);
-    const volumeSlicer = new VolumeSlicer(sceneManager);
+    const volumeSlicer = new VolumeSlicer(sceneManager); // Pasamos sceneManager completo
 
     // --- Manejo de UI de cortes ---
     const sagittalBtn = document.getElementById('sagittal-cut');
@@ -25,25 +31,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const noCutBtn = document.getElementById('no-cut');
     const positionSlider = document.getElementById('position-slider');
 
-    // Función para manejar la selección de un tipo de corte
-    const selectCutType = (type) => {
-        volumeSlicer.setCutPlane(type);
-        // Queremos que el cerebro se vea entero al seleccionar un nuevo tipo de corte.
-        // Esto significa que el plano de corte debe estar en uno de los extremos del bounding box.
-        // Por convención, usaremos el valor 0 (que corresponderá a minCoord del BB).
-        positionSlider.value = 0; // Posiciona el slider al inicio (cerebro completo)
-        volumeSlicer.updateCutPlanePosition(0); // Aplica el corte en la posición 0 (extremo)
-    };
-
-
-    if (sagittalBtn) sagittalBtn.addEventListener('click', () => selectCutType('sagittal'));
-    if (coronalBtn) coronalBtn.addEventListener('click', () => selectCutType('coronal'));
-    if (axialBtn) axialBtn.addEventListener('click', () => selectCutType('axial'));
-    
-    // El botón "Sin Corte" limpiará los cortes y reseteará el slider.
+    if (sagittalBtn) sagittalBtn.addEventListener('click', () => {
+        volumeSlicer.setCutPlane('sagittal');
+        positionSlider.value = 50; // Resetea el slider al centro (0.5 normalizado)
+    });
+    if (coronalBtn) coronalBtn.addEventListener('click', () => {
+        volumeSlicer.setCutPlane('coronal');
+        positionSlider.value = 50;
+    });
+    if (axialBtn) axialBtn.addEventListener('click', () => {
+        volumeSlicer.setCutPlane('axial');
+        positionSlider.value = 50;
+    });
     if (noCutBtn) noCutBtn.addEventListener('click', () => {
-        volumeSlicer.clearCuts(); // Llama a clearCuts para quitar los cortes
-        positionSlider.value = 0; // Resetea el slider al inicio (representa "cerebro completo")
+        volumeSlicer.clearCuts();
+        positionSlider.value = 50;
     });
 
     if (positionSlider) positionSlider.addEventListener('input', (event) => {
@@ -57,7 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (loadModelBtn && modelInput) {
         loadModelBtn.addEventListener('click', () => {
-            modelInput.click();
+            modelInput.click(); // Simula el click en el input file oculto
         });
 
         modelInput.addEventListener('change', async (event) => {
@@ -67,6 +69,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
+            // Mostrar overlay al iniciar la carga de un nuevo archivo
+            if (loadingOverlay) loadingOverlay.style.display = 'flex';
+
             const fileName = file.name;
             const fileExtension = fileName.split('.').pop().toLowerCase();
             let fileURL = null;
@@ -75,9 +80,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Limpiar visualizadores anteriores
             meshVisualizer.clearModel();
-            // Siempre limpiar cortes y resetear slider al cargar un nuevo modelo
-            volumeSlicer.clearCuts();
-            positionSlider.value = 0; // Posición inicial del slider: cerebro completo
+            volumeSlicer.clearCuts(); // Limpiar cortes al cargar un nuevo modelo
+            positionSlider.value = 50; // Resetea el slider
 
             try {
                 let loadedData;
@@ -87,11 +91,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     loadedData = await dataLoader.loadOBJ(fileURL);
                     if (loadedData instanceof THREE.Object3D) {
                         meshVisualizer.setModel(loadedData);
-                        volumeSlicer.setModel(loadedData);
+                        volumeSlicer.setModel(loadedData); // Pasa el modelo al slicer
                         console.log("Modelo OBJ cargado desde input de archivo.");
-                        // Una vez cargado, asegúrate de que el cerebro se muestre completo.
-                        volumeSlicer.clearCuts();
-                        positionSlider.value = 0; // El slider al inicio
                     }
                 } else {
                     console.error(`Tipo de archivo no soportado para carga de usuario: ${fileExtension}`);
@@ -101,31 +102,43 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.error("Error general al cargar el archivo seleccionado:", error);
                 alert(`Error al cargar el archivo: ${error.message}`);
             } finally {
+                // Ocultar overlay SIEMPRE al finalizar la carga (éxito o error)
                 if (fileURL) {
                     URL.revokeObjectURL(fileURL);
                     console.log("URL temporal revocada:", fileURL);
                 }
+                if (loadingOverlay) {
+                    loadingOverlay.style.display = 'none';
+                    console.log("Overlay de carga ocultado.");
+                }
             }
-            event.target.value = '';
+            event.target.value = ''; // Limpiar el input de archivo
         });
     }
 
     // --- Carga inicial del modelo OBJ por defecto ---
     const initialModelPath = 'assets/models/brain_model.obj';
+    
+    // La pantalla de carga ya se mostró al inicio del DOMContentLoaded,
+    // así que no necesitamos mostrarla de nuevo aquí.
     dataLoader.loadFile(initialModelPath)
         .then(data => {
             if (data instanceof THREE.Object3D) {
                 meshVisualizer.setModel(data);
-                volumeSlicer.setModel(data);
+                volumeSlicer.setModel(data); // Pasa el modelo al slicer si es una malla 3D
                 console.log("Modelo OBJ inicial cargado y añadido a la escena.");
-                // Asegúrate de que el cerebro se muestre completo al inicio.
-                volumeSlicer.clearCuts(); // Esto asegura que el cerebro se muestre completo
-                positionSlider.value = 0; // Y el slider se pone al inicio
             } else {
                 console.warn("Tipo de datos no reconocido después de la carga inicial. Se esperaba un modelo 3D.", data);
             }
         })
         .catch(error => {
             console.error("No se pudo cargar el modelo inicial de cerebro:", error);
+        })
+        .finally(() => {
+            // Ocultar el overlay DESPUÉS de que la carga inicial termine (éxito o error)
+            if (loadingOverlay) {
+                loadingOverlay.style.display = 'none';
+                console.log("Overlay de carga ocultado después de la carga inicial.");
+            }
         });
 });

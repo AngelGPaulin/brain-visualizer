@@ -101,14 +101,66 @@
         #slider-container.hidden {
             display: none;
         }
+
+        /* === ESTILOS PARA LA PANTALLA DE CARGA === */
+        #loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9); /* Fondo oscuro semitransparente */
+            display: flex; /* Para centrar el contenido */
+            justify-content: center; /* Centrado horizontal */
+            align-items: center; /* Centrado vertical */
+            z-index: 999; /* Asegura que esté encima de todo lo demás */
+            color: white;
+            font-family: Arial, sans-serif;
+            font-size: 1.2em;
+            flex-direction: column; /* Para apilar spinner y texto */
+        }
+
+        .spinner-container {
+            text-align: center;
+        }
+
+        .loading-gif {
+            width: 200px; /* Ajusta el tamaño de tu GIF */
+            height: 200px;
+            margin-bottom: 20px; /* Espacio entre el GIF y el texto */
+        }
+
+        /* Si usaras un CSS Spinner en lugar de GIF, iría aquí */
+        /*
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid #ffffff;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        */
     </style>
 </head>
 <body>
+    <div id="loading-overlay">
+        <div class="spinner-container">
+            <img src="assets/extras/Pantalla_carga_brain.gif" alt="Cargando modelo 3D..." class="loading-gif">
+            <p>Cargando modelo 3D...</p>
+        </div>
+    </div>
+
     <div id="ui-controls">
         <button id="load-model-btn">Cargar Modelo</button>
         <input type="file" id="model-input" accept=".obj" style="display: none;"> 
         
-        
+        <button id="no-cut">Sin Corte</button>
         <button id="sagittal-cut">Corte Sagital</button>
         <button id="coronal-cut">Corte Coronal</button>
         <button id="axial-cut">Corte Axial</button>
@@ -118,5 +170,7 @@
     </div>
     
     <div id="three-container"></div>
-    </body>
+
+    <script src="bundle.js"></script>
+</body>
 </html>
