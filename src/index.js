@@ -1,4 +1,3 @@
-// src/index.js (Versión corregida para el comportamiento de "cerebro completo")
 import * as THREE from 'three';
 import { SceneManager } from './core/SceneManager.js';
 import { DataLoader } from './core/DataLoader.js';
