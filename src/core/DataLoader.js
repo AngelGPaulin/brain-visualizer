@@ -1,4 +1,3 @@
-// src/core/DataLoader.js
 import * as THREE from 'three';
 import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
 import { Niivue } from '@niivue/niivue';
@@ -39,7 +38,11 @@ export class DataLoader {
             throw new Error(`Canvas con ID "${containerId}" no encontrado.`);
         }
 
-        const nv = new Niivue();
+        const nv = new Niivue({
+            show3Dcrosshair: true,
+            dragAndDropEnabled: false,
+        });
+
         nv.attachToCanvas(canvas);
 
         const objectUrl = URL.createObjectURL(file);
@@ -50,16 +53,14 @@ export class DataLoader {
                     url: objectUrl,
                     file: file,
                     name: file.name,
-                    colorMap: 'gray'
+                    colorMap: 'gray',
                 }
             ]);
 
-            // Configuración de visualización
-            nv.setSliceType(nv.sliceTypeMultiplanar); // ← Esta es la forma correcta
-            nv.setVolumeRender(true);
-            nv.setRenderAzimuthElevation(20, 20);
+            nv.setSliceType(nv.sliceTypeRender); // Render 3D volumétrico
+            nv.setRenderAzimuthElevation(20, 20); // Opcional: rotación inicial
 
-            console.log("Archivo NIfTI cargado y visualizado correctamente.");
+            console.log("Archivo NIfTI cargado y renderizado en 3D correctamente.");
             return nv;
         } catch (error) {
             console.error("Error al cargar el archivo NIfTI:", error);

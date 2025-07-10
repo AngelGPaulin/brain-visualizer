@@ -1,37 +1,24 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mi Visualizador Cerebral</title>
-
     <style>
-        /* === Estilos generales === */
         body {
             margin: 0;
             overflow: hidden;
             font-family: Arial, sans-serif;
-            background: #333;
-            color: #fff;
+            background-color: #333;
+            color: white;
         }
 
-        /* Contenedor Three.js */
         #three-container {
             width: 100vw;
             height: 100vh;
+            display: block;
         }
 
-        /* Canvas Niivue (oculto por defecto) */
-        #nii-canvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            display: none;          /* ← importante */
-        }
-
-        /* === Controles UI === */
         #ui-controls {
             position: absolute;
             top: 10px;
@@ -43,61 +30,84 @@
             display: flex;
             flex-direction: column;
             gap: 10px;
+            z-index: 10;
         }
 
         #ui-controls button {
-            background: #007bff;
-            color: #fff;
+            background-color: #007bff;
+            color: white;
             border: none;
             padding: 8px 12px;
             border-radius: 4px;
             cursor: pointer;
             font-size: 14px;
-            transition: background-color 0.3s;
+            transition: background-color 0.3s ease;
         }
-        #ui-controls button:hover { background: #0056b3; }
-        #ui-controls button.active { background: #28a745; }
 
-        #ui-controls label { font-size: 14px; }
+        #ui-controls button:hover {
+            background-color: #0056b3;
+        }
+
+        #ui-controls button.active {
+            background-color: #28a745;
+        }
+
+        #ui-controls label {
+            font-size: 14px;
+        }
 
         #ui-controls input[type="range"] {
             width: 200px;
-            -webkit-appearance: none;
             height: 8px;
             background: #d3d3d3;
-            border-radius: 5px;
+            outline: none;
             opacity: 0.7;
+            transition: opacity .2s;
+            border-radius: 5px;
         }
-        #ui-controls input[type="range"]::-webkit-slider-thumb,
-        #ui-controls input[type="range"]::-moz-range-thumb {
+
+        #ui-controls input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
             width: 18px;
             height: 18px;
             border-radius: 50%;
             background: #007bff;
             cursor: pointer;
         }
+
+        #ui-controls input[type="range"]::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #0276f2;
+            cursor: pointer;
+        }
+
+        #slider-container.hidden {
+            display: none;
+        }
     </style>
 </head>
-
 <body>
-    <!-- Controles -->
     <div id="ui-controls">
         <button id="load-model-btn">Cargar Modelo</button>
-        <input type="file" id="model-input" accept=".obj,.nii,.nii.gz" style="display:none" />
+        <input type="file" id="model-input" accept=".obj,.nii,.nii.gz" style="display: none;">
 
         <button id="sagittal-cut">Corte Sagital</button>
         <button id="coronal-cut">Corte Coronal</button>
         <button id="axial-cut">Corte Axial</button>
 
         <label for="position-slider">Posición de Corte:</label>
-        <input type="range" id="position-slider" min="0" max="100" value="50" />
+        <input type="range" id="position-slider" min="0" max="100" value="50">
+
+        <!-- Nuevo botón agregado -->
+        <button id="toggle-view-btn">Cambiar a Vista 2D</button>
     </div>
 
-    <!-- Lienzos de visualización -->
     <div id="three-container"></div>
     <canvas id="nii-canvas"></canvas>
 
-    <!-- Script principal -->
     <script type="module" src="./index.js"></script>
 </body>
 </html>
