@@ -54,9 +54,7 @@ export class DataLoader {
                 }
             ]);
 
-            // Configuración de visualización
-            nv.setSliceType(nv.sliceTypeMultiplanar); // ← Esta es la forma correcta
-            nv.setVolumeRender(true);
+            nv.setSliceType(nv.sliceTypeMultiplanar); // o sliceTypeRender si usas render volumétrico
             nv.setRenderAzimuthElevation(20, 20);
 
             console.log("Archivo NIfTI cargado y visualizado correctamente.");
