@@ -41,6 +41,8 @@ export class DataLoader {
         const nv = new Niivue({
             show3Dcrosshair: true,
             dragAndDropEnabled: false,
+            isResizeCanvas: true,
+            isSliceMM: false, // Usar coordenadas de voxel
         });
 
         nv.attachToCanvas(canvas);
@@ -54,13 +56,13 @@ export class DataLoader {
                     file: file,
                     name: file.name,
                     colorMap: 'gray',
+                    opacity: 1,
                 }
             ]);
 
-            nv.setSliceType(nv.sliceTypeRender); // Render 3D volumétrico
-            nv.setRenderAzimuthElevation(20, 20); // Opcional: rotación inicial
-
-            console.log("Archivo NIfTI cargado y renderizado en 3D correctamente.");
+            nv.setSliceType(nv.sliceTypeRender); // Modo 3D
+            nv.setClipPlane([0, 0, 0, 0]); // Inicializar plano de corte
+            console.log("NIfTI cargado en modo 3D con cortes habilitados.");
             return nv;
         } catch (error) {
             console.error("Error al cargar el archivo NIfTI:", error);

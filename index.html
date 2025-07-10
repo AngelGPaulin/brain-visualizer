@@ -3,45 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mi Visualizador Cerebral</title>
+    <title>Visualizador Cerebral</title>
     <style>
         body {
             margin: 0;
+            padding: 0;
             overflow: hidden;
             font-family: Arial, sans-serif;
-            background-color: #333;
-            color: white;
+            height: 100vh;
+            width: 100vw;
         }
 
-        #three-container {
-            width: 100vw;
-            height: 100vh;
-            display: block;
+        #three-container, #nii-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100% !important;
+            height: 100% !important;
+            z-index: 0;
         }
 
         #ui-controls {
-            position: absolute;
-            top: 10px;
-            left: 10px;
+            position: fixed;
+            top: 20px;
+            left: 20px;
             background: rgba(0, 0, 0, 0.7);
             padding: 15px;
             border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            z-index: 100;
             display: flex;
             flex-direction: column;
             gap: 10px;
-            z-index: 10;
+            width: 220px;
         }
 
         #ui-controls button {
             background-color: #007bff;
             color: white;
             border: none;
-            padding: 8px 12px;
+            padding: 10px;
             border-radius: 4px;
             cursor: pointer;
             font-size: 14px;
-            transition: background-color 0.3s ease;
+            width: 100%;
         }
 
         #ui-controls button:hover {
@@ -52,39 +56,11 @@
             background-color: #28a745;
         }
 
-        #ui-controls label {
-            font-size: 14px;
+        #position-slider {
+            width: 100%;
         }
 
-        #ui-controls input[type="range"] {
-            width: 200px;
-            height: 8px;
-            background: #d3d3d3;
-            outline: none;
-            opacity: 0.7;
-            transition: opacity .2s;
-            border-radius: 5px;
-        }
-
-        #ui-controls input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 18px;
-            height: 18px;
-            border-radius: 50%;
-            background: #007bff;
-            cursor: pointer;
-        }
-
-        #ui-controls input[type="range"]::-moz-range-thumb {
-            width: 18px;
-            height: 18px;
-            border-radius: 50%;
-            background: #0276f2;
-            cursor: pointer;
-        }
-
-        #slider-container.hidden {
+        #nii-canvas {
             display: none;
         }
     </style>
@@ -101,8 +77,7 @@
         <label for="position-slider">Posición de Corte:</label>
         <input type="range" id="position-slider" min="0" max="100" value="50">
 
-        <!-- Nuevo botón agregado -->
-        <button id="toggle-view-btn">Cambiar a Vista 2D</button>
+        <button id="toggle-view-btn">Cambiar Vista</button>
     </div>
 
     <div id="three-container"></div>
