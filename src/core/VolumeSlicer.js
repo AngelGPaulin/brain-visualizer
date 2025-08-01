@@ -1,4 +1,3 @@
-// src/core/VolumeSlicer.js
 import * as THREE from 'three';
 
 export class VolumeSlicer {
@@ -9,9 +8,10 @@ export class VolumeSlicer {
         }
         this.sceneManager = sceneManager;
         this.model = null;
+        this.niiViewer = null;
         this.activeCutPlane = 'none';
-        this.modelBoundingBox = new THREE.Box3(); // Para almacenar el bounding box del modelo
-        this.currentClipPosition = 0; // Guardar la última posición del corte
+        this.modelBoundingBox = new THREE.Box3();
+        this.currentClipPosition = 0;
 
         console.log("VolumeSlicer inicializado con SceneManager.");
     }
@@ -27,7 +27,6 @@ export class VolumeSlicer {
 
         this.modelBoundingBox.setFromObject(this.model);
         console.log("Bounding Box del modelo:", this.modelBoundingBox);
-
 
         this.model.traverse((child) => {
             if (child.isMesh) {
@@ -45,12 +44,20 @@ export class VolumeSlicer {
         });
     }
 
-    /**
-     * Establece el tipo de plano de corte activo.
-     * Al cambiar de tipo, no aplica un corte visible inicialmente.
-     * En su lugar, el slider (en index.js) se encargará de posicionar el corte.
-     * @param {string} type El tipo de corte ('sagittal', 'coronal', 'axial', o 'none').
-     */
+    setNiiViewer(viewer) {
+        this.niiViewer = viewer;
+        console.log("Estableciendo visor NIfTI para VolumeSlicer.");
+        
+        if (this.niiViewer && this.niiViewer.volumes.length > 0) {
+            const volume = this.niiViewer.volumes[0];
+            this.modelBoundingBox.set(
+                new THREE.Vector3(volume.minPlaneX, volume.minPlaneY, volume.minPlaneZ),
+                new THREE.Vector3(volume.maxPlaneX, volume.maxPlaneY, volume.maxPlaneZ)
+            );
+            console.log("Bounding Box del volumen NIfTI:", this.modelBoundingBox);
+        }
+    }
+
     setCutPlane(type) {
         if (!['sagittal', 'coronal', 'axial', 'none'].includes(type)) {
             console.warn(`Tipo de corte inválido: ${type}. Usando 'none'.`);
@@ -60,38 +67,28 @@ export class VolumeSlicer {
         }
         console.log(`Tipo de corte activo establecido a: ${this.activeCutPlane}`);
 
-        // NOTA: Ya no llamamos a applyCut aquí. El `index.js` es responsable de llamar
-        // `updateCutPlanePosition` con la posición inicial del slider (0 o 100).
         if (this.activeCutPlane === 'none') {
-            this.clearCuts(); // Si se establece 'none', limpia los cortes
+            this.clearCuts();
         }
     }
 
-    /**
-     * Actualiza la posición del plano de corte activo.
-     * Este método es para ser llamado por el slider.
-     * Mapea normalizedPosition (0-1) a un rango que cubre el bounding box completo del modelo.
-     * @param {number} normalizedPosition La posición del corte, normalizada de 0 a 1.
-     */
     updateCutPlanePosition(normalizedPosition) {
-        if (!this.model || this.activeCutPlane === 'none') {
-            // Si no hay modelo o no hay corte activo, no hagas nada.
-            // La responsabilidad de 'none' es de clearCuts().
+        if (this.activeCutPlane === 'none') {
             return;
         }
 
         let minCoord, maxCoord;
 
         switch (this.activeCutPlane) {
-            case 'sagittal': // Corta a lo largo del eje X
+            case 'sagittal':
                 minCoord = this.modelBoundingBox.min.x;
                 maxCoord = this.modelBoundingBox.max.x;
                 break;
-            case 'coronal': // Corta a lo largo del eje Y
+            case 'coronal':
                 minCoord = this.modelBoundingBox.min.y;
                 maxCoord = this.modelBoundingBox.max.y;
                 break;
-            case 'axial': // Corta a lo largo del eje Z
+            case 'axial':
                 minCoord = this.modelBoundingBox.min.z;
                 maxCoord = this.modelBoundingBox.max.z;
                 break;
@@ -100,27 +97,44 @@ export class VolumeSlicer {
                 return;
         }
 
-        // Mapear normalizedPosition (0 a 1) al rango minCoord a maxCoord
-        // Si 0 en slider es minCoord y 1 es maxCoord
         const actualPosition = minCoord + (maxCoord - minCoord) * normalizedPosition;
         this.currentClipPosition = actualPosition;
 
         console.log(`Actualizando posición de corte ${this.activeCutPlane} a: ${actualPosition.toFixed(2)} (normalizada: ${normalizedPosition.toFixed(2)})`);
 
-        // La normal del plano de corte en SceneManager.js apunta hacia el lado "visible"
-        // Si la normal es (1,0,0) (sagital), un `constant` de -X cortará a la izquierda de X.
-        // Queremos que `actualPosition` sea el punto exacto donde se encuentra el corte.
-        // Entonces, el valor de la constante para el plano será el NEGATIVO de la posición.
-        this.sceneManager.applyClipPlane(this.activeCutPlane, actualPosition);
+        if (this.niiViewer) {
+            // Para NIfTI: aplicar el corte directamente en la vista 3D
+            const volume = this.niiViewer.volumes[0];
+            if (!volume) return;
+
+            switch(this.activeCutPlane) {
+                case 'sagittal':
+                    this.niiViewer.clipPlane = [1, 0, 0, -actualPosition];
+                    break;
+                case 'coronal':
+                    this.niiViewer.clipPlane = [0, 1, 0, -actualPosition];
+                    break;
+                case 'axial':
+                    this.niiViewer.clipPlane = [0, 0, 1, -actualPosition];
+                    break;
+            }
+            this.niiViewer.updateGLVolume();
+        } else if (this.model) {
+            // Para OBJ: usar el sistema de clipping planes de Three.js
+            this.sceneManager.applyClipPlane(this.activeCutPlane, actualPosition);
+        }
     }
 
-    /**
-     * Remueve todos los cortes.
-     */
     clearCuts() {
         console.log("Limpiando todos los cortes.");
-        this.activeCutPlane = 'none'; // Resetear el plano activo
-        this.currentClipPosition = 0; // Resetear la posición (no relevante cuando no hay corte, pero buena práctica)
-        this.sceneManager.applyClipPlane('none'); // Notifica a SceneManager para limpiar los planos
+        this.activeCutPlane = 'none';
+        this.currentClipPosition = 0;
+        
+        if (this.niiViewer) {
+            this.niiViewer.clipPlane = [0, 0, 0, 0];
+            this.niiViewer.updateGLVolume();
+        } else {
+            this.sceneManager.applyClipPlane('none');
+        }
     }
 }

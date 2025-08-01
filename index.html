@@ -3,102 +3,64 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mi Visualizador Cerebral</title>
+    <title>Visualizador Cerebral</title>
     <style>
-        /* Estilos generales del cuerpo */
         body {
             margin: 0;
-            overflow: hidden; /* Evita barras de desplazamiento */
+            padding: 0;
+            overflow: hidden;
             font-family: Arial, sans-serif;
-            background-color: #333; /* Fondo oscuro */
-            color: white; /* Texto claro */
+            height: 100vh;
+            width: 100vw;
         }
 
-        /* Contenedor para la escena de Three.js */
-        #three-container {
-            width: 100vw; /* Ancho de la ventana */
-            height: 100vh; /* Alto de la ventana */
-            display: block; /* Asegura que no haya espacios extra */
-        }
-
-        /* Controles de la interfaz de usuario */
-        #ui-controls {
+        #three-container, #nii-canvas {
             position: absolute;
-            top: 10px;
-            left: 10px;
-            background: rgba(0, 0, 0, 0.7); /* Fondo semi-transparente */ 
+            top: 0;
+            left: 0;
+            width: 100% !important;
+            height: 100% !important;
+            z-index: 0;
+        }
+
+        #ui-controls {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.7);
             padding: 15px;
             border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); /* Sombra para profundidad */
+            z-index: 100;
             display: flex;
-            flex-direction: column; /* Botones apilados verticalmente */
-            gap: 10px; /* Espacio entre elementos */
+            flex-direction: column;
+            gap: 10px;
+            width: 220px;
         }
 
-        /* Estilo de los botones */
         #ui-controls button {
-            background-color: #007bff; /* Azul primario */
+            background-color: #007bff;
             color: white;
             border: none;
-            padding: 8px 12px;
+            padding: 10px;
             border-radius: 4px;
             cursor: pointer;
             font-size: 14px;
-            transition: background-color 0.3s ease; /* Transición suave al hover */
+            width: 100%;
         }
 
         #ui-controls button:hover {
-            background-color: #0056b3; /* Azul más oscuro al pasar el ratón */
+            background-color: #0056b3;
         }
 
         #ui-controls button.active {
-            background-color: #28a745; /* Verde para el botón activo */
+            background-color: #28a745;
         }
 
-        /* Estilo de las etiquetas del slider */
-        #ui-controls label {
-            margin-bottom: 5px;
-            font-size: 14px;
+        #position-slider {
+            width: 100%;
         }
 
-        /* Estilo del input de tipo range (slider) */
-        #ui-controls input[type="range"] {
-            width: 200px;
-            -webkit-appearance: none; /* Eliminar estilos por defecto del navegador */
-            height: 8px;
-            background: #d3d3d3; /* Color de la pista del slider */
-            outline: none;
-            opacity: 0.7;
-            transition: opacity .2s;
-            border-radius: 5px;
-        }
-
-        #ui-controls input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 18px;
-            height: 18px;
-            border-radius: 50%; /* Pulgar redondo */
-            background: #007bff; /* Color del pulgar */
-            cursor: pointer;
-        }
-
-        #ui-controls input[type="range"]::-moz-range-thumb {
-            width: 18px;
-            height: 18px;
-            border-radius: 50%;
-            background: #0276f2;
-            cursor: pointer;
-        }
-
-        /* Estilo para el valor mostrado del slider (si lo tuvieras) */
-        #slider-value {
-            margin-left: 10px;
-            font-size: 14px;
-        }
-        
-        /* Opcional: Clase para ocultar el contenedor del slider */
-        #slider-container.hidden {
+        #nii-canvas {
             display: none;
         }
 
@@ -158,19 +120,24 @@
 
     <div id="ui-controls">
         <button id="load-model-btn">Cargar Modelo</button>
-        <input type="file" id="model-input" accept=".obj" style="display: none;"> 
-        
-        <button id="no-cut">Sin Corte</button>
+
+        <input type="file" id="model-input" accept=".obj,.nii,.nii.gz" style="display: none;">
+
         <button id="sagittal-cut">Corte Sagital</button>
         <button id="coronal-cut">Corte Coronal</button>
         <button id="axial-cut">Corte Axial</button>
-        
+
         <label for="position-slider">Posición de Corte:</label>
         <input type="range" id="position-slider" min="0" max="100" value="50">
+
+        <button id="toggle-view-btn">Cambiar Vista</button>
     </div>
-    
+
     <div id="three-container"></div>
 
-    <script src="bundle.js"></script>
+    <canvas id="nii-canvas"></canvas>
+
+    <script type="module" src="./index.js"></script>
+
 </body>
 </html>
