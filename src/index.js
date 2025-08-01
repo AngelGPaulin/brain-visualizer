@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const sceneManager = new SceneManager('three-container');
     const dataLoader = new DataLoader();
     const meshVisualizer = new MeshVisualizer(sceneManager.scene);
-    const volumeSlicer = new VolumeSlicer(sceneManager);
+    const volumeSlicer = new VolumeSlicer(sceneManager); // Pasamos sceneManager completo
 
     // Elementos UI
     const uiElements = {
@@ -41,8 +41,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 this.classList.add('active');
                 
                 // Establecer eje activo
-                activeAxis = this.id === 'sagittal-cut' ? 'x' : 
-                            this.id === 'coronal-cut' ? 'y' : 'z';
+                activeAxis = this.id === 'sagittal-cut' ? 'x' :
+                             this.id === 'coronal-cut' ? 'y' : 'z';
                 
                 // Aplicar corte inicial
                 updateSlicePosition(0.5);
