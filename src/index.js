@@ -21,7 +21,8 @@ document.addEventListener('DOMContentLoaded', () => {
         loadModelBtn: document.getElementById('load-model-btn'),
         modelInput: document.getElementById('model-input'),
         threeContainer: document.getElementById('three-container'),
-        niiCanvas: document.getElementById('nii-canvas')
+        niiCanvas: document.getElementById('nii-canvas'),
+        loadingOverlay: document.getElementById('loading-overlay') // AÑADIDO: Referencia al overlay de carga
     };
 
     // Estado
@@ -119,11 +120,19 @@ document.addEventListener('DOMContentLoaded', () => {
     setupCutButtons();
     setupEventListeners();
 
-    // Cargar modelo inicial
+    // Cargar modelo inicial y ocultar el overlay
     dataLoader.loadFile('assets/models/brain_model.obj')
         .then(model => {
             meshVisualizer.setModel(model);
             volumeSlicer.setModel(model);
+            
+            // Ocultar la pantalla de carga una vez que el modelo inicial se ha cargado
+            uiElements.loadingOverlay.style.display = 'none';
         })
-        .catch(console.error);
+        .catch(error => {
+            console.error("Error al cargar el modelo inicial:", error);
+            alert("Error al cargar el modelo 3D inicial. Por favor, revisa la consola.");
+            // Ocultar el overlay incluso si hay un error para que el usuario pueda interactuar
+            uiElements.loadingOverlay.style.display = 'none'; 
+        });
 });
