@@ -1,6 +1,7 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 module.exports = {
   // Punto de entrada de tu aplicación, generalmente tu archivo JavaScript principal.
@@ -16,7 +17,6 @@ module.exports = {
   // Configuración del servidor de desarrollo de Webpack.
   devServer: {
     // Especifica dónde debe buscar el servidor los archivos estáticos.
-    // Ahora apunta a la carpeta 'dist', donde CopyWebpackPlugin copiará tus assets.
     static: {
       directory: path.resolve(__dirname, 'dist'),
     },
@@ -31,32 +31,33 @@ module.exports = {
     // Genera un archivo HTML y le inyecta automáticamente tu bundle JavaScript.
     new HtmlWebpackPlugin({
       template: './index.html', // Ruta a tu archivo de plantilla HTML.
-      filename: 'index.html',   // Nombre del archivo HTML de salida en 'dist'.
+      filename: 'index.html', // Nombre del archivo HTML de salida en 'dist'.
     }),
     // Copia archivos o directorios completos a la carpeta de salida (dist).
-    // Esto es crucial para tus modelos 3D y otros assets que no son importados directamente
-    // en tu JS pero que necesitas que estén disponibles en el servidor.
     new CopyWebpackPlugin({
       patterns: [
         {
           from: 'src/assets', // Origen: la carpeta 'assets' dentro de 'src'.
-          to: 'assets',       // Destino: una subcarpeta 'assets' dentro de 'dist'.
+          to: 'assets', // Destino: una subcarpeta 'assets' dentro de 'dist'.
           noErrorOnMissing: true, // No lanza un error si la carpeta de origen no existe.
         },
       ],
+    }),
+    // Extrae el CSS de tus archivos JS en un archivo CSS aparte
+    new MiniCssExtractPlugin({
+        filename: '[name].css',
     }),
   ],
 
   // Reglas para cómo Webpack maneja los diferentes tipos de módulos (archivos).
   module: {
     rules: [
-      // Regla para archivos CSS.
+      // Regla para archivos CSS. Ahora usa MiniCssExtractPlugin.loader
       {
         test: /\.css$/,
-        use: ['style-loader', 'css-loader'], // style-loader inyecta CSS en el DOM, css-loader interpreta @import y url().
+        use: [MiniCssExtractPlugin.loader, 'css-loader'],
       },
       // Regla para archivos de imagen y modelos 3D.
-      // 'asset/resource' copiará estos archivos a la carpeta de salida.
       {
         test: /\.(png|svg|jpg|jpeg|gif|obj|nii|gz|minc|gltf)$/i,
         type: 'asset/resource',

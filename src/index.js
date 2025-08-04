@@ -4,12 +4,16 @@ import { DataLoader } from './core/DataLoader.js';
 import { MeshVisualizer } from './core/MeshVisualizer.js';
 import { VolumeSlicer } from './core/VolumeSlicer.js';
 
+// ¡IMPORTANTE! Se importa el CSS aquí para que Webpack lo procese.
+// Asegúrate de que el archivo style.css esté en la ruta 'src/ui/style.css'
+import './ui/style.css';
+
 document.addEventListener('DOMContentLoaded', () => {
     // Inicialización
     const sceneManager = new SceneManager('three-container');
     const dataLoader = new DataLoader();
     const meshVisualizer = new MeshVisualizer(sceneManager.scene);
-    const volumeSlicer = new VolumeSlicer(sceneManager); // Pasamos sceneManager completo
+    const volumeSlicer = new VolumeSlicer(sceneManager);
 
     // Elementos UI
     const uiElements = {
@@ -22,7 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
         modelInput: document.getElementById('model-input'),
         threeContainer: document.getElementById('three-container'),
         niiCanvas: document.getElementById('nii-canvas'),
-        loadingOverlay: document.getElementById('loading-overlay') // AÑADIDO: Referencia al overlay de carga
+        loadingOverlay: document.getElementById('loading-overlay')
     };
 
     // Estado
@@ -45,7 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 activeAxis = this.id === 'sagittal-cut' ? 'x' :
                              this.id === 'coronal-cut' ? 'y' : 'z';
                 
-                // Aplicar corte inicial
+                // Aplicar corte inicial en el centro
                 updateSlicePosition(0.5);
             });
         });
@@ -62,8 +66,9 @@ document.addEventListener('DOMContentLoaded', () => {
             clipPlane[axisIndex] = 1;
             clipPlane[3] = -clipPosition;
             currentNiiViewer.setClipPlane(clipPlane);
-        } else if (volumeSlicer.model) {
-            volumeSlicer.updateCutPlanePosition(normalizedPos);
+        } else if (volumeSlicer.model && activeAxis) {
+            // Se pasa el eje activo a la función de corte del VolumeSlicer
+            volumeSlicer.updateCutPlanePosition(normalizedPos, activeAxis);
         }
     }
 
@@ -71,7 +76,9 @@ document.addEventListener('DOMContentLoaded', () => {
     function setupEventListeners() {
         // Slider
         uiElements.positionSlider.addEventListener('input', (e) => {
-            updateSlicePosition(e.target.value / 100);
+            if (activeAxis) { // Solo actualizamos si hay un eje de corte seleccionado
+                updateSlicePosition(e.target.value / 100);
+            }
         });
 
         // Carga de modelos
@@ -98,7 +105,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     meshVisualizer.setModel(model);
                     volumeSlicer.setModel(model);
                     currentNiiViewer = null;
-                } 
+                }
                 else if (extension === 'nii' || extension === 'gz') {
                     // Modo NIfTI
                     uiElements.threeContainer.style.display = 'none';
@@ -133,6 +140,6 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error("Error al cargar el modelo inicial:", error);
             alert("Error al cargar el modelo 3D inicial. Por favor, revisa la consola.");
             // Ocultar el overlay incluso si hay un error para que el usuario pueda interactuar
-            uiElements.loadingOverlay.style.display = 'none'; 
+            uiElements.loadingOverlay.style.display = 'none';
         });
 });
