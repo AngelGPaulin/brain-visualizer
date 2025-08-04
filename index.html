@@ -4,97 +4,85 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Visualizador Cerebral</title>
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-            font-family: Arial, sans-serif;
-            height: 100vh;
-            width: 100vw;
-        }
-
-        #three-container, #nii-canvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100% !important;
-            height: 100% !important;
-            z-index: 0;
-        }
-
-        #ui-controls {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            background: rgba(0, 0, 0, 0.7);
-            padding: 15px;
-            border-radius: 8px;
-            z-index: 100;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            width: 220px;
-        }
-
-        #ui-controls button {
-            background-color: #007bff;
-            color: white;
-            border: none;
-            padding: 10px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 14px;
-            width: 100%;
-        }
-
-        #ui-controls button:hover {
-            background-color: #0056b3;
-        }
-
-        #ui-controls button.active {
-            background-color: #28a745;
-        }
-
-        #position-slider {
-            width: 100%;
-        }
-
-        #nii-canvas {
-            display: none;
-        }
-
-        /* === ESTILOS PARA LA PANTALLA DE CARGA === */
-        #loading-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.9); /* Fondo oscuro semitransparente */
-            display: flex; /* Para centrar el contenido */
-            justify-content: center; /* Centrado horizontal */
-            align-items: center; /* Centrado vertical */
-            z-index: 999; /* Asegura que esté encima de todo lo demás */
-            color: white;
-            font-family: Arial, sans-serif;
-            font-size: 1.2em;
-            flex-direction: column; /* Para apilar spinner y texto */
-        }
-
-        .spinner-container {
-            text-align: center;
-        }
-
-        .loading-gif {
-            width: 200px; /* Ajusta el tamaño de tu GIF */
-            height: 200px;
-            margin-bottom: 20px; /* Espacio entre el GIF y el texto */
-        }
-
-
-    </style>
 </head>
+
+<style>
+    body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    font-family: Arial, sans-serif;
+    height: 100vh;
+    width: 100vw;
+}
+#three-container, #nii-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100% !important;
+    height: 100% !important;
+    z-index: 0;
+}
+#ui-controls {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 15px;
+    border-radius: 8px;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 220px;
+}
+#ui-controls button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    width: 100%;
+}
+#ui-controls button:hover {
+    background-color: #0056b3;
+}
+#ui-controls button.active {
+    background-color: #28a745;
+}
+#position-slider {
+    width: 100%;
+}
+#nii-canvas {
+    display: none;
+}
+#loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.9);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 999;
+    color: white;
+    font-family: Arial, sans-serif;
+    font-size: 1.2em;
+    flex-direction: column;
+}
+.spinner-container {
+    text-align: center;
+}
+.loading-gif {
+    width: 200px;
+    height: 200px;
+    margin-bottom: 20px;
+}
+</style>
 <body>
     <div id="loading-overlay">
         <div class="spinner-container">
