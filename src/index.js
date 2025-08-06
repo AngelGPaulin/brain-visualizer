@@ -28,64 +28,45 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Estado
   let currentNiiViewer = null;
-  let activeAxis = null;
 
   // Configuración de botones de corte
   function setupCutButtons() {
-    [
-      uiElements.sagittalBtn,
-      uiElements.coronalBtn,
-      uiElements.axialBtn,
-    ].forEach((btn) => {
-      btn.addEventListener("click", function () {
-        // Resetear botones
-        [
-          uiElements.sagittalBtn,
-          uiElements.coronalBtn,
-          uiElements.axialBtn,
-        ].forEach((b) => {
-          b.classList.remove("active");
-        });
+  [ uiElements.sagittalBtn, uiElements.coronalBtn, uiElements.axialBtn ].forEach((btn) => {
+    btn.addEventListener("click", function () {
+      // 1) reset clases
+      [ uiElements.sagittalBtn, uiElements.coronalBtn, uiElements.axialBtn ]
+        .forEach(b => b.classList.remove("active"));
+      // 2) activar este
+      this.classList.add("active");
 
-        // Activar botón actual
-        this.classList.add("active");
+      // 3) decirle a volumeSlicer qué tipo de corte es
+      const cutType =
+        this.id === "sagittal-cut" ? "sagittal"
+        : this.id === "coronal-cut"  ? "coronal"
+        :                             "axial";
+      volumeSlicer.setCutPlane(cutType);
 
-        // Establecer eje activo
-        activeAxis =
-          this.id === "sagittal-cut"
-            ? "x"
-            : this.id === "coronal-cut"
-            ? "y"
-            : "z";
-
-        // Aplicar corte inicial
-        updateSlicePosition(0.5);
-      });
+      // 4) forzar un slice en la posición actual del slider
+      const norm = uiElements.positionSlider.value / 100;
+      updateSlicePosition(norm);
     });
-  }
+  });
+}
+
 
   // Actualizar posición de corte
   function updateSlicePosition(normalizedPos) {
-    if (currentNiiViewer && activeAxis) {
-      const volume = currentNiiViewer.volumes[0];
-      const dims = volume.dims;
-      const axisIndex = activeAxis === "x" ? 0 : activeAxis === "y" ? 1 : 2;
-      const clipPosition = Math.floor(normalizedPos * dims[axisIndex]);
-      const clipPlane = [0, 0, 0, 0];
-      clipPlane[axisIndex] = 1;
-      clipPlane[3] = -clipPosition;
-      currentNiiViewer.setClipPlane(clipPlane);
-    } else if (volumeSlicer.model) {
-      volumeSlicer.updateCutPlanePosition(normalizedPos);
-    }
-  }
+  volumeSlicer.updateCutPlanePosition(normalizedPos);
+}
+
 
   // Configurar eventos
   function setupEventListeners() {
     // Slider
-    uiElements.positionSlider.addEventListener("input", (e) => {
-      updateSlicePosition(e.target.value / 100);
-    });
+    uiElements.positionSlider.addEventListener("input", e => {
+  updateSlicePosition(e.target.value / 100);
+});
+
 
     // Carga de modelos
     uiElements.loadModelBtn.addEventListener("click", () =>
@@ -120,6 +101,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
           currentNiiViewer = await dataLoader.loadNII(file, "nii-canvas");
           currentNiiViewer.setSliceType(currentNiiViewer.sliceTypeRender);
+          volumeSlicer.setNiiViewer(currentNiiViewer);
         }
       } catch (error) {
         console.error("Error al cargar archivo:", error);

@@ -73,57 +73,61 @@ export class VolumeSlicer {
     }
 
     updateCutPlanePosition(normalizedPosition) {
-        if (this.activeCutPlane === 'none') {
+    if (this.activeCutPlane === 'none') return;
+
+    // 1) Definimos min/max y la normal según el tipo de corte
+    let minCoord, maxCoord;
+    let normal; // [nx,ny,nz]
+
+    switch (this.activeCutPlane) {
+        case 'sagittal':
+            // plano X = recorre min.x → max.x
+            minCoord = this.modelBoundingBox.min.x;
+            maxCoord = this.modelBoundingBox.max.x;
+            normal   = [ 1, 0, 0 ];
+            break;
+
+        case 'coronal':
+            // plano Y = recorre min.y → max.y
+            minCoord = this.modelBoundingBox.min.y;
+            maxCoord = this.modelBoundingBox.max.y;
+            normal   = [ 0, 1, 0 ];
+            break;
+
+        case 'axial':
+            // plano Z = recorre min.z → max.z
+            minCoord = this.modelBoundingBox.min.z;
+            maxCoord = this.modelBoundingBox.max.z;
+            normal   = [ 0, 0, 1 ];
+            break;
+
+        default:
+            console.warn("Tipo de corte desconocido:", this.activeCutPlane);
             return;
-        }
-
-        let minCoord, maxCoord;
-
-        switch (this.activeCutPlane) {
-            case 'sagittal':
-                minCoord = this.modelBoundingBox.min.x;
-                maxCoord = this.modelBoundingBox.max.x;
-                break;
-            case 'coronal':
-                minCoord = this.modelBoundingBox.min.y;
-                maxCoord = this.modelBoundingBox.max.y;
-                break;
-            case 'axial':
-                minCoord = this.modelBoundingBox.min.z;
-                maxCoord = this.modelBoundingBox.max.z;
-                break;
-            default:
-                console.warn("Tipo de corte desconocido para updateCutPlanePosition.");
-                return;
-        }
-
-        const actualPosition = minCoord + (maxCoord - minCoord) * normalizedPosition;
-        this.currentClipPosition = actualPosition;
-
-        console.log(`Actualizando posición de corte ${this.activeCutPlane} a: ${actualPosition.toFixed(2)} (normalizada: ${normalizedPosition.toFixed(2)})`);
-
-        if (this.niiViewer) {
-            // Para NIfTI: aplicar el corte directamente en la vista 3D
-            const volume = this.niiViewer.volumes[0];
-            if (!volume) return;
-
-            switch(this.activeCutPlane) {
-                case 'sagittal':
-                    this.niiViewer.clipPlane = [1, 0, 0, -actualPosition];
-                    break;
-                case 'coronal':
-                    this.niiViewer.clipPlane = [0, 1, 0, -actualPosition];
-                    break;
-                case 'axial':
-                    this.niiViewer.clipPlane = [0, 0, 1, -actualPosition];
-                    break;
-            }
-            this.niiViewer.updateGLVolume();
-        } else if (this.model) {
-            // Para OBJ: usar el sistema de clipping planes de Three.js
-            this.sceneManager.applyClipPlane(this.activeCutPlane, actualPosition);
-        }
     }
+
+    // 2) Calculamos la posición real del plano
+    const actualPosition = minCoord + (maxCoord - minCoord) * normalizedPosition;
+    this.currentClipPosition = actualPosition;
+
+    console.log(
+      `Corte activo: ${this.activeCutPlane} → eje ${
+        this.activeCutPlane === 'sagittal' ? 'X'
+      : this.activeCutPlane === 'coronal'  ? 'Y'
+      :                                     'Z'
+      }`,
+      `pos = ${actualPosition.toFixed(2)} (norm = ${normalizedPosition.toFixed(2)})`
+    );
+
+    // 3) Aplicamos el clipPlane ya con el normal correcto
+    if (this.niiViewer) {
+        this.niiViewer.setClipPlane([ normal[0], normal[1], normal[2], -actualPosition ]);
+  this.niiViewer.updateGLVolume();
+    } else if (this.model) {
+        this.sceneManager.applyClipPlane(this.activeCutPlane, actualPosition);
+    }
+}
+
 
     clearCuts() {
         console.log("Limpiando todos los cortes.");
@@ -131,7 +135,7 @@ export class VolumeSlicer {
         this.currentClipPosition = 0;
         
         if (this.niiViewer) {
-            this.niiViewer.clipPlane = [0, 0, 0, 0];
+            this.niiViewer.setClipPlane([0, 0, 0, 0]);
             this.niiViewer.updateGLVolume();
         } else {
             this.sceneManager.applyClipPlane('none');

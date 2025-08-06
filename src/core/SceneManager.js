@@ -113,12 +113,12 @@ export class SceneManager {
                 break;
             case 'coronal': // Corta a lo largo del eje Y (plano XZ)
                 targetPlane = this.clippingPlanes[1];
-                targetPlane.normal.set(0, 1, 0); // Normal apunta en la dirección positiva de Y
+                targetPlane.normal.set(0, 0, 1); // Normal apunta en la dirección positiva de Y
                 targetPlane.constant = -position;
                 break;
             case 'axial': // Corta a lo largo del eje Z (plano XY)
                 targetPlane = this.clippingPlanes[2];
-                targetPlane.normal.set(0, 0, 1); // Normal apunta en la dirección positiva de Z
+                targetPlane.normal.set(0, 1, 0); // Normal apunta en la dirección positiva de Z
                 targetPlane.constant = -position;
                 break;
             case 'none':
