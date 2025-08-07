@@ -1,37 +1,46 @@
 <!DOCTYPE html>
 <html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Visualizador Cerebral</title>
-</head>
-<body>
+  </head>
+  <body>
     <div id="loading-overlay">
-        <div class="spinner-container">
-            <img src="assets/extras/Pantalla_carga_brain.gif" alt="Cargando modelo 3D..." class="loading-gif">
-            <p>Cargando modelo 3D...</p>
-        </div>
+      <div class="spinner-container">
+        <img
+          src="assets/extras/Pantalla_carga_brain.gif"
+          alt="Cargando modelo 3D..."
+          class="loading-gif"
+        />
+        <p>Cargando modelo 3D...</p>
+      </div>
     </div>
 
     <div id="ui-controls">
-        <button id="load-model-btn">Cargar Modelo</button>
+      <button id="load-model-btn">Cargar Modelo</button>
 
-        <input type="file" id="model-input" accept=".obj,.nii,.nii.gz" style="display: none;">
+      <input
+        type="file"
+        id="model-input"
+        accept=".obj,.nii,.nii.gz"
+        style="display: none"
+      />
 
-        <button id="sagittal-cut">Corte Sagital</button>
-        <button id="coronal-cut">Corte Coronal</button>
-        <button id="axial-cut">Corte Axial</button>
+      <button id="sagittal-cut">Corte Sagital</button>
+      <button id="coronal-cut">Corte Coronal</button>
+      <button id="axial-cut">Corte Axial</button>
 
-        <label for="position-slider">Posición de Corte:</label>
-        <input type="range" id="position-slider" min="0" max="100" value="50">
+      <label for="position-slider">Posición de Corte:</label>
+      <input type="range" id="position-slider" min="0" max="100" value="50" />
 
-        <button id="toggle-view-btn">Cambiar Vista</button>
+      <button id="toggle-view-btn">Cambiar Vista</button>
     </div>
 
     <div id="three-container"></div>
 
     <canvas id="nii-canvas"></canvas>
 
-
-</body>
+    <script type="module" src="./index.js"></script>
+  </body>
 </html>
