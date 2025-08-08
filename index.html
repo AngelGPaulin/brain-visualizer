@@ -3,24 +3,160 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Visualizador Cerebral</title>
+    <title>Visualizador Cerebral NIfTI</title>
   </head>
+
+<style>
+  body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  font-family: Arial, sans-serif;
+  height: 100vh;
+  width: 100vw;
+}
+
+#three-container,
+#nii-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100% !important;
+  height: 100% !important;
+  z-index: 0;
+}
+
+#ui-controls {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  background: rgba(0, 0, 0, 0.7);
+  padding: 15px;
+  border-radius: 8px;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 220px;
+  color: white; /* Agregado para que todo el texto dentro del contenedor sea blanco */
+}
+
+/* Reglas específicas para los nuevos elementos de la UI */
+#ui-controls h3 {
+  margin: 0 0 5px 0;
+  padding: 0;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+#ui-controls p {
+  margin: 0 0 5px 0;
+  font-size: 12px;
+}
+
+#ui-controls label {
+  font-size: 14px;
+  margin-top: 5px;
+  display: block;
+}
+
+#ui-controls input[type="file"] {
+  background-color: #333;
+  color: white;
+  border: 1px solid #555;
+  padding: 5px;
+  border-radius: 4px;
+  cursor: pointer;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+#ui-controls input[type="file"]::-webkit-file-upload-button {
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 8px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+#ui-controls input[type="file"]::-webkit-file-upload-button:hover {
+  background: #0056b3;
+}
+
+#ui-controls button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  width: 100%;
+}
+
+#ui-controls button:hover {
+  background-color: #0056b3;
+}
+
+#ui-controls button.active {
+  background-color: #28a745;
+}
+
+#position-slider {
+  width: 100%;
+}
+
+#nii-canvas {
+  display: none;
+}
+
+/* === ESTILOS PARA LA PANTALLA DE CARGA === */
+#loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.9); /* Fondo oscuro semitransparente */
+  display: flex; /* Para centrar el contenido */
+  justify-content: center; /* Centrado horizontal */
+  align-items: center; /* Centrado vertical */
+  z-index: 999; /* Asegura que esté encima de todo lo demás */
+  color: white;
+  font-family: Arial, sans-serif;
+  font-size: 1.2em;
+  flex-direction: column; /* Para apilar spinner y texto */
+}
+
+.spinner-container {
+  text-align: center;
+}
+
+.loading-gif {
+  width: 200px; /* Ajusta el tamaño de tu GIF */
+  height: 200px;
+  margin-bottom: 20px; /* Espacio entre el GIF y el texto */
+}
+</style>
+
+
   <body>
-    <div id="loading-overlay">
+    <div id="loading-overlay" style="display: none;">
       <div class="spinner-container">
         <img
           src="assets/extras/Pantalla_carga_brain.gif"
-          alt="Cargando modelo 3D..."
+          alt="Cargando volúmenes..."
           class="loading-gif"
         />
-        <p>Cargando modelo 3D...</p>
+        <p>Cargando volúmenes...</p>
       </div>
     </div>
 
     <div id="ui-controls">
-      <div id="nii-upload-form" style="display: none;">
-        <h3>Cargar Múltiples Volúmenes</h3>
-        <p>Para una visualización completa, por favor, selecciona los siguientes archivos:</p>
+      <div id="nii-upload-form">
+        <h3>Cargar Volúmenes NIfTI</h3>
+        <p>Selecciona los siguientes archivos:</p>
         <label for="anatomical-file">1. Volumen Anatómico (.nii.gz):</label>
         <input type="file" id="anatomical-file" accept=".nii,.nii.gz">
         
@@ -33,28 +169,13 @@
         <button id="submit-nii-btn">Visualizar NIfTI</button>
       </div>
       
-      <button id="toggle-upload-btn">Cargar Modelo</button>
-      
-      <div id="obj-controls">
-        <label for="obj-file">Cargar Archivo OBJ:</label>
-        <input type="file" id="obj-file" accept=".obj">
-        <div id="cut-controls">
-          <button id="sagittal-cut">Corte Sagital</button>
-          <button id="coronal-cut">Corte Coronal</button>
-          <button id="axial-cut">Corte Axial</button>
-        </div>
-      </div>
-      
-      <label for="position-slider">Posición de Corte:</label>
-      <input type="range" id="position-slider" min="0" max="100" value="50" />
-
       <div id="nii-controls" style="display: none;">
         <label for="atlasSlider">Opacidad del Atlas</label>
         <input
           type="range"
           min="0"
           max="100"
-          value="64"
+          value="50"
           class="slider"
           id="atlasSlider"
         />
@@ -71,7 +192,6 @@
       </div>
     </div>
 
-    <div id="three-container"></div>
     <canvas id="nii-canvas"></canvas>
 
     <script type="module" src="./index.js"></script>
