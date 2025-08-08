@@ -29,6 +29,50 @@ body {
   flex-direction: column;
   gap: 10px;
   width: 220px;
+  color: white; /* Agregado para que todo el texto dentro del contenedor sea blanco */
+}
+
+/* Reglas específicas para los nuevos elementos de la UI */
+#ui-controls h3 {
+  margin: 0 0 5px 0;
+  padding: 0;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+#ui-controls p {
+  margin: 0 0 5px 0;
+  font-size: 12px;
+}
+
+#ui-controls label {
+  font-size: 14px;
+  margin-top: 5px;
+  display: block;
+}
+
+#ui-controls input[type="file"] {
+  background-color: #333;
+  color: white;
+  border: 1px solid #555;
+  padding: 5px;
+  border-radius: 4px;
+  cursor: pointer;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+#ui-controls input[type="file"]::-webkit-file-upload-button {
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 8px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+#ui-controls input[type="file"]::-webkit-file-upload-button:hover {
+  background: #0056b3;
 }
 
 #ui-controls button {

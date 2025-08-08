@@ -1,4 +1,3 @@
-
 import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
 import { Niivue } from '@niivue/niivue';
 
@@ -28,9 +27,9 @@ export class DataLoader {
         });
     }
 
-    async loadNII(file, containerId) {
-        if (!(file instanceof File)) {
-            throw new Error("El archivo proporcionado no es un objeto File válido.");
+    async loadNII(files, containerId) {
+        if (!files || files.length !== 3) {
+            throw new Error("Se requieren exactamente 3 archivos NIfTI para la visualización multiplanar.");
         }
 
         const canvas = document.getElementById(containerId);
@@ -39,36 +38,64 @@ export class DataLoader {
         }
 
         const nv = new Niivue({
+            backColor: [1, 1, 1, 1],
             show3Dcrosshair: true,
             dragAndDropEnabled: false,
             isResizeCanvas: true,
-            isSliceMM: false, // Usar coordenadas de voxel
+            isSliceMM: false,
         });
 
         nv.attachToCanvas(canvas);
 
-        const objectUrl = URL.createObjectURL(file);
+        const volumeList = files.map((file, index) => {
+            const objectUrl = URL.createObjectURL(file);
+            let colormap, opacity, colorbarVisible = true;
+
+            switch(index) {
+                case 0:
+                    colormap = 'gray';
+                    opacity = 1;
+                    colorbarVisible = false;
+                    break;
+                case 1:
+                    colormap = 'glasbey';
+                    opacity = 0.5;
+                    colorbarVisible = false;
+                    break;
+                case 2:
+                    colormap = 'warm';
+                    opacity = 1;
+                    colorbarVisible = true;
+                    break;
+            }
+
+            return {
+                url: objectUrl,
+                file: file,
+                name: file.name,
+                colormap: colormap,
+                opacity: opacity,
+                colorbarVisible: colorbarVisible
+            };
+        });
 
         try {
-            await nv.loadVolumes([
-                {
-                    url: objectUrl,
-                    file: file,
-                    name: file.name,
-                    colorMap: 'gray',
-                    opacity: 1,
-                }
-            ]);
+            await nv.loadVolumes(volumeList);
+            
+            const aalVolume = nv.volumes[1];
+            const response = await fetch("assets/colormaps/aal.json"); 
+            const cmap = await response.json();
+            aalVolume.setColormapLabel(cmap);
 
-            nv.setSliceType(nv.sliceTypeRender); // Modo 3D
-            nv.setClipPlane([0, 0, 0, 0]); // Inicializar plano de corte
-            console.log("NIfTI cargado en modo 3D con cortes habilitados.");
+            nv.setSliceType(nv.sliceTypeMultiplanar);
+            console.log("NIfTI cargado en modo multiplanar.");
+            
             return nv;
         } catch (error) {
-            console.error("Error al cargar el archivo NIfTI:", error);
+            console.error("Error al cargar los archivos NIfTI:", error);
             throw error;
         } finally {
-            URL.revokeObjectURL(objectUrl);
+            volumeList.forEach(vol => URL.revokeObjectURL(vol.url));
         }
     }
 

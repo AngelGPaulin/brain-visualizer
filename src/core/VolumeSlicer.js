@@ -73,60 +73,54 @@ export class VolumeSlicer {
     }
 
     updateCutPlanePosition(normalizedPosition) {
-    if (this.activeCutPlane === 'none') return;
-
-    // 1) Definimos min/max y la normal según el tipo de corte
-    let minCoord, maxCoord;
-    let normal; // [nx,ny,nz]
-
-    switch (this.activeCutPlane) {
-        case 'sagittal':
-            // plano X = recorre min.x → max.x
-            minCoord = this.modelBoundingBox.min.x;
-            maxCoord = this.modelBoundingBox.max.x;
-            normal   = [ 1, 0, 0 ];
-            break;
-
-        case 'coronal':
-            // plano Y = recorre min.y → max.y
-            minCoord = this.modelBoundingBox.min.y;
-            maxCoord = this.modelBoundingBox.max.y;
-            normal   = [ 0, 1, 0 ];
-            break;
-
-        case 'axial':
-            // plano Z = recorre min.z → max.z
-            minCoord = this.modelBoundingBox.min.z;
-            maxCoord = this.modelBoundingBox.max.z;
-            normal   = [ 0, 0, 1 ];
-            break;
-
-        default:
-            console.warn("Tipo de corte desconocido:", this.activeCutPlane);
-            return;
+        if (this.activeCutPlane === 'none') return;
+    
+        let minCoord, maxCoord;
+        let normal;
+    
+        switch (this.activeCutPlane) {
+            case 'sagittal':
+                minCoord = this.modelBoundingBox.min.x;
+                maxCoord = this.modelBoundingBox.max.x;
+                normal   = [ 1, 0, 0 ];
+                break;
+    
+            case 'coronal':
+                minCoord = this.modelBoundingBox.min.y;
+                maxCoord = this.modelBoundingBox.max.y;
+                normal   = [ 0, 1, 0 ];
+                break;
+    
+            case 'axial':
+                minCoord = this.modelBoundingBox.min.z;
+                maxCoord = this.modelBoundingBox.max.z;
+                normal   = [ 0, 0, 1 ];
+                break;
+    
+            default:
+                console.warn("Tipo de corte desconocido:", this.activeCutPlane);
+                return;
+        }
+    
+        const actualPosition = minCoord + (maxCoord - minCoord) * normalizedPosition;
+        this.currentClipPosition = actualPosition;
+    
+        console.log(
+          `Corte activo: ${this.activeCutPlane} → eje ${
+            this.activeCutPlane === 'sagittal' ? 'X'
+          : this.activeCutPlane === 'coronal'  ? 'Y'
+          :                                     'Z'
+          }`,
+          `pos = ${actualPosition.toFixed(2)} (norm = ${normalizedPosition.toFixed(2)})`
+        );
+    
+        if (this.niiViewer) {
+            this.niiViewer.setClipPlane([ normal[0], normal[1], normal[2], -actualPosition ]);
+            this.niiViewer.updateGLVolume();
+        } else if (this.model) {
+            this.sceneManager.applyClipPlane(this.activeCutPlane, actualPosition);
+        }
     }
-
-    // 2) Calculamos la posición real del plano
-    const actualPosition = minCoord + (maxCoord - minCoord) * normalizedPosition;
-    this.currentClipPosition = actualPosition;
-
-    console.log(
-      `Corte activo: ${this.activeCutPlane} → eje ${
-        this.activeCutPlane === 'sagittal' ? 'X'
-      : this.activeCutPlane === 'coronal'  ? 'Y'
-      :                                     'Z'
-      }`,
-      `pos = ${actualPosition.toFixed(2)} (norm = ${normalizedPosition.toFixed(2)})`
-    );
-
-    // 3) Aplicamos el clipPlane ya con el normal correcto
-    if (this.niiViewer) {
-        this.niiViewer.setClipPlane([ normal[0], normal[1], normal[2], -actualPosition ]);
-  this.niiViewer.updateGLVolume();
-    } else if (this.model) {
-        this.sceneManager.applyClipPlane(this.activeCutPlane, actualPosition);
-    }
-}
 
 
     clearCuts() {

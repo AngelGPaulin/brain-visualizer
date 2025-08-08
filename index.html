@@ -18,27 +18,60 @@
     </div>
 
     <div id="ui-controls">
-      <button id="load-model-btn">Cargar Modelo</button>
-
-      <input
-        type="file"
-        id="model-input"
-        accept=".obj,.nii,.nii.gz"
-        style="display: none"
-      />
-
-      <button id="sagittal-cut">Corte Sagital</button>
-      <button id="coronal-cut">Corte Coronal</button>
-      <button id="axial-cut">Corte Axial</button>
-
+      <div id="nii-upload-form" style="display: none;">
+        <h3>Cargar Múltiples Volúmenes</h3>
+        <p>Para una visualización completa, por favor, selecciona los siguientes archivos:</p>
+        <label for="anatomical-file">1. Volumen Anatómico (.nii.gz):</label>
+        <input type="file" id="anatomical-file" accept=".nii,.nii.gz">
+        
+        <label for="atlas-file">2. Atlas Cerebral (.nii.gz):</label>
+        <input type="file" id="atlas-file" accept=".nii,.nii.gz">
+        
+        <label for="stats-file">3. Datos Estadísticos (.nii.gz):</label>
+        <input type="file" id="stats-file" accept=".nii,.nii.gz">
+        <br>
+        <button id="submit-nii-btn">Visualizar NIfTI</button>
+      </div>
+      
+      <button id="toggle-upload-btn">Cargar Modelo</button>
+      
+      <div id="obj-controls">
+        <label for="obj-file">Cargar Archivo OBJ:</label>
+        <input type="file" id="obj-file" accept=".obj">
+        <div id="cut-controls">
+          <button id="sagittal-cut">Corte Sagital</button>
+          <button id="coronal-cut">Corte Coronal</button>
+          <button id="axial-cut">Corte Axial</button>
+        </div>
+      </div>
+      
       <label for="position-slider">Posición de Corte:</label>
       <input type="range" id="position-slider" min="0" max="100" value="50" />
 
-      <button id="toggle-view-btn">Cambiar Vista</button>
+      <div id="nii-controls" style="display: none;">
+        <label for="atlasSlider">Opacidad del Atlas</label>
+        <input
+          type="range"
+          min="0"
+          max="100"
+          value="64"
+          class="slider"
+          id="atlasSlider"
+        />
+        <label for="statSlider">Opacidad de Estadísticas</label>
+        <input
+          type="range"
+          min="0"
+          max="100"
+          value="100"
+          class="slider"
+          id="statSlider"
+        />
+        <button id="toggle-view-btn">Cambiar a Vista 3D</button>
+      </div>
     </div>
 
     <div id="three-container"></div>
-
     <canvas id="nii-canvas"></canvas>
 
     <script type="module" src="./index.js"></script>
