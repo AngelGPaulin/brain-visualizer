@@ -11,15 +11,17 @@ export class SceneManager {
         }
 
         this.scene = new THREE.Scene();
+        // AÑADIR COLOR DE FONDO NEGRO A LA ESCENA PARA EVITAR VISUALIZACIONES ANARANJADAS
+        this.scene.background = new THREE.Color(0x000000); 
+
         this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         this.renderer = new THREE.WebGLRenderer({ antialias: true });
         this.controls = null;
 
-        // Inicializa los planos de recorte. Los valores de 'constant' se modificarán dinámicamente.
         this.clippingPlanes = [
-            new THREE.Plane(new THREE.Vector3(1, 0, 0), 0),  // Sagital (X)
-            new THREE.Plane(new THREE.Vector3(0, 1, 0), 0),  // Coronal (Y)
-            new THREE.Plane(new THREE.Vector3(0, 0, 1), 0)   // Axial (Z)
+            new THREE.Plane(new THREE.Vector3(1, 0, 0), 0),
+            new THREE.Plane(new THREE.Vector3(0, 1, 0), 0),
+            new THREE.Plane(new THREE.Vector3(0, 0, 1), 0)
         ];
 
         this.isInitialized = true;
@@ -32,7 +34,7 @@ export class SceneManager {
 
         this.renderer.localClippingEnabled = true; // Habilitar recorte local en el renderizador
 
-        this.camera.position.set(0, 0, 150); // Ajusta la posición de la cámara para que el modelo sea visible
+        this.camera.position.set(0, 0, 150);
         this.camera.lookAt(new THREE.Vector3(0, 0, 0));
 
         this.controls = new OrbitControls(this.camera, this.renderer.domElement);
@@ -91,34 +93,28 @@ export class SceneManager {
         this.setupLighting();
     }
 
-    /**
-     * Aplica o limpia un plano de recorte al renderizador.
-     * @param {string} type El tipo de corte ('sagittal', 'coronal', 'axial', 'none').
-     * @param {number} [position=0] La coordenada real en el espacio 3D para el corte.
-     */
     applyClipPlane(type, position = 0) {
-        // Deshabilitar todos los planos primero
         this.clippingPlanes.forEach(plane => {
-            plane.constant = Infinity; // Mueve el plano infinitamente lejos para deshabilitarlo
+            plane.constant = Infinity;
         });
-        this.renderer.clippingPlanes = []; // Limpiar los planos del renderizador
+        this.renderer.clippingPlanes = [];
 
         let targetPlane = null;
 
         switch (type) {
-            case 'sagittal': // Corta a lo largo del eje X (plano YZ)
+            case 'sagittal':
                 targetPlane = this.clippingPlanes[0];
-                targetPlane.normal.set(1, 0, 0); // Normal apunta en la dirección positiva de X
-                targetPlane.constant = -position; // Si normal es (1,0,0) y position es X, entonces X + constant = 0 => constant = -X
-                break;
-            case 'coronal': // Corta a lo largo del eje Y (plano XZ)
-                targetPlane = this.clippingPlanes[1];
-                targetPlane.normal.set(0, 0, 1); // Normal apunta en la dirección positiva de Y
+                targetPlane.normal.set(1, 0, 0);
                 targetPlane.constant = -position;
                 break;
-            case 'axial': // Corta a lo largo del eje Z (plano XY)
+            case 'coronal':
+                targetPlane = this.clippingPlanes[1];
+                targetPlane.normal.set(0, 0, 1);
+                targetPlane.constant = -position;
+                break;
+            case 'axial':
                 targetPlane = this.clippingPlanes[2];
-                targetPlane.normal.set(0, 1, 0); // Normal apunta en la dirección positiva de Z
+                targetPlane.normal.set(0, 1, 0);
                 targetPlane.constant = -position;
                 break;
             case 'none':

@@ -50,6 +50,7 @@ export class DataLoader {
         const volumeList = files.map((file, index) => {
             const objectUrl = URL.createObjectURL(file);
             let colormap, opacity, colorbarVisible = true;
+            let cal_min, cal_max;
 
             switch(index) {
                 case 0:
@@ -58,7 +59,6 @@ export class DataLoader {
                     colorbarVisible = false;
                     break;
                 case 1:
-                    colormap = 'glasbey';
                     opacity = 0.5;
                     colorbarVisible = false;
                     break;
@@ -66,6 +66,10 @@ export class DataLoader {
                     colormap = 'warm';
                     opacity = 1;
                     colorbarVisible = true;
+                    // Se añaden umbrales para los datos estadísticos
+                    // Esto evita que los valores no significativos se muestren
+                    cal_min = 0.50;
+                    cal_max = 5.0; 
                     break;
             }
 
@@ -75,7 +79,10 @@ export class DataLoader {
                 name: file.name,
                 colormap: colormap,
                 opacity: opacity,
-                colorbarVisible: colorbarVisible
+                colorbarVisible: colorbarVisible,
+                // Se añaden los nuevos umbrales al objeto del volumen
+                cal_min: cal_min,
+                cal_max: cal_max
             };
         });
 
