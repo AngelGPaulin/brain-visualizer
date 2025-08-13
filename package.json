@@ -27,7 +27,7 @@
     "webpack-dev-server": "^4.0.0"
   },
   "dependencies": {
-    "@niivue/niivue": "^0.60.0",
+    "@niivue/niivue": "^0.62.0",
     "three": "^0.165.0"
   }
 }
