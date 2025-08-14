@@ -1,131 +1,100 @@
+:root {
+    --primary-color: #007bff;
+    --background-color: #f0f2f5;
+    --card-background: #ffffff;
+    --text-color: #333;
+    --border-color: #ddd;
+    --shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
 body {
-  margin: 0;
-  padding: 0;
-  overflow: hidden;
-  font-family: Arial, sans-serif;
-  height: 100vh;
-  width: 100vw;
+    font-family: 'Arial', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    margin: 0;
+    padding: 20px;
+    background-color: var(--background-color);
+    color: var(--text-color);
 }
 
-#three-container,
-#nii-canvas {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100% !important;
-  height: 100% !important;
-  z-index: 0;
+.container {
+    width: 100%;
+    max-width: 1200px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
 }
 
-#ui-controls {
-  position: fixed;
-  top: 20px;
-  left: 20px;
-  background: rgba(0, 0, 0, 0.7);
-  padding: 15px;
-  border-radius: 8px;
-  z-index: 100;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  width: 220px;
-  color: white; /* Agregado para que todo el texto dentro del contenedor sea blanco */
+header {
+    text-align: center;
 }
 
-/* Reglas específicas para los nuevos elementos de la UI */
-#ui-controls h3 {
-  margin: 0 0 5px 0;
-  padding: 0;
-  font-size: 16px;
-  font-weight: bold;
+.main-title {
+    font-size: 2.5em;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin: 0;
 }
 
-#ui-controls p {
-  margin: 0 0 5px 0;
-  font-size: 12px;
+.subtitle {
+    font-size: 1.2em;
+    font-style: italic;
+    color: #666;
+    margin-top: 5px;
 }
 
-#ui-controls label {
-  font-size: 14px;
-  margin-top: 5px;
-  display: block;
+.controls-panel {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+    background-color: var(--card-background);
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: var(--shadow);
 }
 
-#ui-controls input[type="file"] {
-  background-color: #333;
-  color: white;
-  border: 1px solid #555;
-  padding: 5px;
-  border-radius: 4px;
-  cursor: pointer;
-  width: 100%;
-  box-sizing: border-box;
+.control-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
-#ui-controls input[type="file"]::-webkit-file-upload-button {
-  background: #007bff;
-  color: white;
-  border: none;
-  padding: 8px;
-  border-radius: 4px;
-  cursor: pointer;
+.control-label {
+    font-weight: bold;
+    margin-bottom: 5px;
 }
 
-#ui-controls input[type="file"]::-webkit-file-upload-button:hover {
-  background: #0056b3;
+.control-select, .control-slider {
+    width: 200px;
 }
 
-#ui-controls button {
-  background-color: #007bff;
-  color: white;
-  border: none;
-  padding: 10px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 14px;
-  width: 100%;
+.control-select {
+    padding: 8px;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    background-color: #fafafa;
 }
 
-#ui-controls button:hover {
-  background-color: #0056b3;
+.slider-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
-#ui-controls button.active {
-  background-color: #28a745;
+#plot {
+    width: 90vw;
+    height: 80vh;
+    background-color: var(--card-background);
+    border-radius: 10px;
+    box-shadow: var(--shadow);
 }
 
-#position-slider {
-  width: 100%;
-}
-
-#nii-canvas {
-  display: none;
-}
-
-/* === ESTILOS PARA LA PANTALLA DE CARGA === */
-#loading-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.9); /* Fondo oscuro semitransparente */
-  display: flex; /* Para centrar el contenido */
-  justify-content: center; /* Centrado horizontal */
-  align-items: center; /* Centrado vertical */
-  z-index: 999; /* Asegura que esté encima de todo lo demás */
-  color: white;
-  font-family: Arial, sans-serif;
-  font-size: 1.2em;
-  flex-direction: column; /* Para apilar spinner y texto */
-}
-
-.spinner-container {
-  text-align: center;
-}
-
-.loading-gif {
-  width: 200px; /* Ajusta el tamaño de tu GIF */
-  height: 200px;
-  margin-bottom: 20px; /* Espacio entre el GIF y el texto */
+.error-message {
+    color: #d9534f;
+    font-weight: bold;
+    text-align: center;
 }
