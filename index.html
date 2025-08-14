@@ -1,79 +1,34 @@
 <!DOCTYPE html>
-<html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Visualizador Cerebral</title>
-  </head>
-  <body>
-    <div id="loading-overlay">
-      <div class="spinner-container">
-        <img
-          src="assets/extras/Pantalla_carga_brain.gif"
-          alt="Cargando modelo 3D..."
-          class="loading-gif"
-        />
-        <p>Cargando modelo 3D...</p>
-      </div>
-    </div>
+<html>
+<head>
+    <title>Visualización 3D del Cerebro</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1 class="main-title">Atlas Cerebral Interactivo</h1>
+            <p class="subtitle">Visualización 3D de la estructura y regiones de interés</p>
+        </header>
 
-    <div id="ui-controls">
-      <div id="nii-upload-form" style="display: none;">
-        <h3>Cargar Múltiples Volúmenes</h3>
-        <p>Para una visualización completa, por favor, selecciona los siguientes archivos:</p>
-        <label for="anatomical-file">1. Volumen Anatómico (.nii.gz):</label>
-        <input type="file" id="anatomical-file" accept=".nii,.nii.gz">
-        
-        <label for="atlas-file">2. Atlas Cerebral (.nii.gz):</label>
-        <input type="file" id="atlas-file" accept=".nii,.nii.gz">
-        
-        <label for="stats-file">3. Datos Estadísticos (.nii.gz):</label>
-        <input type="file" id="stats-file" accept=".nii,.nii.gz">
-        <br>
-        <button id="submit-nii-btn">Visualizar NIfTI</button>
-      </div>
-      
-      <button id="toggle-upload-btn">Cargar Modelo</button>
-      
-      <div id="obj-controls">
-        <label for="obj-file">Cargar Archivo OBJ:</label>
-        <input type="file" id="obj-file" accept=".obj">
-        <div id="cut-controls">
-          <button id="sagittal-cut">Corte Sagital</button>
-          <button id="coronal-cut">Corte Coronal</button>
-          <button id="axial-cut">Corte Axial</button>
+        <div class="controls-panel">
+            <div class="control-group">
+                <label for="roi-select" class="control-label">Selecciona una Región de Interés (ROI):</label>
+                <select id="roi-select" class="control-select"></select>
+            </div>
+            <div class="control-group">
+                <label for="opacity-slider" class="control-label">Opacidad del Cerebro Base:</label>
+                <div class="slider-container">
+                    <input type="range" id="opacity-slider" min="0" max="1" step="0.1" value="0.3" class="control-slider">
+                    <span id="opacity-value" class="slider-value">0.3</span>
+                </div>
+            </div>
         </div>
-      </div>
-      
-      <label for="position-slider">Posición de Corte:</label>
-      <input type="range" id="position-slider" min="0" max="100" value="50" />
 
-      <div id="nii-controls" style="display: none;">
-        <label for="atlasSlider">Opacidad del Atlas</label>
-        <input
-          type="range"
-          min="0"
-          max="100"
-          value="64"
-          class="slider"
-          id="atlasSlider"
-        />
-        <label for="statSlider">Opacidad de Estadísticas</label>
-        <input
-          type="range"
-          min="0"
-          max="100"
-          value="100"
-          class="slider"
-          id="statSlider"
-        />
-        <button id="toggle-view-btn">Cambiar a Vista 3D</button>
-      </div>
+        <div id="plot"></div>
     </div>
-
-    <div id="three-container"></div>
-    <canvas id="nii-canvas"></canvas>
-
-    <script type="module" src="./index.js"></script>
-  </body>
+    
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="index.js"></script>
+</body>
 </html>
