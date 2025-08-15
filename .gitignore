@@ -6,3 +6,5 @@ brain_env/
 
 # Archivos de datos generados
 brain_data.json
+custom_data.json
+node_modules/

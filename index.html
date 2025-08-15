@@ -1,10 +1,13 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-    <title>Visualización 3D del Cerebro</title>
-    <link rel="stylesheet" href="styles.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Atlas Cerebral Interactivo</title>
+    <link rel="stylesheet" href="src/ui/styles.css">    
 </head>
 <body>
+
     <div class="container">
         <header>
             <h1 class="main-title">Atlas Cerebral Interactivo</h1>
@@ -13,22 +16,52 @@
 
         <div class="controls-panel">
             <div class="control-group">
-                <label for="roi-select" class="control-label">Selecciona una Región de Interés (ROI):</label>
-                <select id="roi-select" class="control-select"></select>
+                <label for="roi-select" class="control-label">Selecciona una Región de Interés (ROI)</label>
+                <div class="roi-selection-group">
+                    <select id="roi-select" class="control-select"></select>
+                    <button id="edit-region-btn" class="edit-btn" title="Editar región seleccionada">Editar</button>
+                </div>
             </div>
             <div class="control-group">
-                <label for="opacity-slider" class="control-label">Opacidad del Cerebro Base:</label>
+                <label for="opacity-slider" class="control-label">Opacidad del Cerebro Base</label>
                 <div class="slider-container">
                     <input type="range" id="opacity-slider" min="0" max="1" step="0.1" value="0.3" class="control-slider">
                     <span id="opacity-value" class="slider-value">0.3</span>
                 </div>
             </div>
+            <div class="control-group action-buttons">
+                <button id="save-json-btn" class="btn-primary">Guardar Nombres en JSON</button>
+                <button id="reset-rois-btn" class="btn-danger">Restablecer Nombres</button>
+            </div>
         </div>
 
         <div id="plot"></div>
     </div>
-    
+
+    <div id="edit-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Editar Información de la Región</h2>
+                <button id="close-modal-btn" class="close-btn">&times;</button>
+            </div>
+            <form id="edit-form">
+                <div class="form-group">
+                    <label for="edit-name">Nombre de la Región</label>
+                    <input type="text" id="edit-name" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-description">Descripción</label>
+                    <textarea id="edit-description" rows="5"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" id="cancel-edit-btn" class="btn-secondary">Cancelar</button>
+                    <button type="submit" class="btn-primary">Guardar Cambios</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-    <script src="index.js"></script>
+    <script src="src/index.js"></script>
 </body>
 </html>

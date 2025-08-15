@@ -6,11 +6,12 @@ import nibabel as nib
 from skimage import measure
 import numpy as np
 from nilearn import image
+from scipy.ndimage import gaussian_filter  # <-- 1. Importar la función de suavizado
 
 # --- Cargar archivos y remuestrear el atlas ---
 print("Iniciando la generación de datos para la visualización...")
-mni_img = nib.load('mni152.nii.gz')
-aal_img = nib.load('aal.nii.gz')
+mni_img = nib.load('src/assets/models/mni152.nii.gz')
+aal_img = nib.load('src/assets/models/aal.nii.gz')
 resampled_aal_img = image.resample_img(aal_img, target_affine=mni_img.affine, target_shape=mni_img.shape, interpolation='nearest')
 
 mni_data = mni_img.get_fdata()
@@ -64,10 +65,17 @@ for roi_item in rois_list:
         continue
 
     masked_mni_data = mni_data * roi_mask
-    min_roi_val = np.min(masked_mni_data[masked_mni_data > 0])
-    max_roi_val = np.max(masked_mni_data)
+    
+    # --- 2. Aplicar filtro Gaussiano para suavizar la ROI ---
+    # El valor de sigma controla la intensidad del suavizado.
+    smoothed_roi_data = gaussian_filter(masked_mni_data, sigma=1)
+
+    min_roi_val = np.min(smoothed_roi_data[smoothed_roi_data > 0])
+    max_roi_val = np.max(smoothed_roi_data)
     threshold_roi = min_roi_val + (max_roi_val - min_roi_val) / 2
-    verts_roi, faces_roi, _, _ = measure.marching_cubes(masked_mni_data, level=threshold_roi, step_size=1)
+    
+    # Usar los datos suavizados para generar la malla
+    verts_roi, faces_roi, _, _ = measure.marching_cubes(smoothed_roi_data, level=threshold_roi, step_size=1)
     
     all_meshes['roi_meshes'].append({
         'name': roi_item['name'],
@@ -76,7 +84,7 @@ for roi_item in rois_list:
         'faces': faces_roi.tolist(),
     })
 
-print("Mallas 3D para el cerebro completo y cada ROI generadas.")
+print("Mallas 3D para el cerebro completo y cada ROI (suavizadas) generadas.")
 
 # Guardar los datos en un solo archivo JSON
 with open('brain_data.json', 'w') as f:
